@@ -1,0 +1,63 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <link  href="~/css/stylesheet.css" rel="stylesheet"/>
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid d-flex align-items-center clearfix">
+                <!-- Sidebar toggle for mobile -->
+                <button class="btn btn-outline-primary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">
+                    <i class="bi bi-list"></i>
+                </button>
+                <a class="navbar-brand d-flex mb-0 h1" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-journal-text"></i>
+                    <span class="ms-2 user-select-none">NoteFeature</span>
+                </a>
+            </div>
+        </nav>
+    </header>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar for desktop -->
+            <aside class="sidebar col-lg-2 d-none d-lg-block p-0">
+                <div class="d-flex flex-column align-items-start p-3 pt-4">
+                    <span class="fs-5 fw-bold mb-4 user-select-none"></i>Menu</span>
+                    <ul class="nav nav-pills flex-column w-100 user-select-none">
+                        <li class="nav-item mb-2">
+                            <a class="nav-link text-dark" href="/"><i class="bi bi-house-door me-2"></i>Dashboard</a>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+            <!-- Offcanvas Sidebar for mobile -->
+            <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasSidebar" aria-labelledby="offcanvasSidebarLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="offcanvasSidebarLabel"><i class="bi bi-journal-text me-2"></i>Menu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <ul class="nav nav-pills flex-column w-100">
+                        <li class="nav-item mb-2">
+                            <a class="nav-link text-dark" href="/"><i class="bi bi-house-door me-2"></i>My Notes</a>
+                        </li>
+                        <li class="nav-item mb-2">
+                            <a class="nav-link text-dark" href="/create"><i class="bi bi-journal me-2"></i>Create</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- Main Content -->
+            <main class="col-12 col-lg-10 py-5 px-5">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+</body>
+</html>

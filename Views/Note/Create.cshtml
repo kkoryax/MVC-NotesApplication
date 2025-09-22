@@ -1,0 +1,50 @@
+﻿@model NoteFeature_App.Models.NoteModel
+@{
+    ViewBag.Title = "Create";
+}
+
+<main>
+    <h1 class="user-select-none">Create Note</h1>
+
+    <form action="create" method="post">
+        <div class="mb-3">
+            <label for="NoteTitle" class="form-label">
+                Title<span class="text-danger">*</span>
+            </label>
+            <input class="form-control" id="NoteTitle" name="NoteTitle" type="text" placeholder="โปรดใส่ชื่อเรื่องที่ต้องการ" />
+        </div>
+        <div class="mb-3">
+            <label for="NoteContent" class="form-label">
+                Content<span class="text-danger">*</span>
+            </label>
+            <textarea id="NoteContent" name="NoteContent" class="form-control" placeholder="กรุณาใส่เนื้อหาที่ต้องการของคุณ" style="height: 150px"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="IsPinned">
+                <input type="checkbox" id="IsPinned" name="IsPinned" value="true" class="form-check-input" />
+                Pin this note
+            </label>
+        </div>
+       
+        <div class="d-flex flex-row justify-content-between">
+            <button class="btn btn-success" type="submit">
+                <i class="bi bi-plus-lg"></i>
+                New
+            </button>
+            <a class="btn btn-primary" href="/">
+                Back
+            </a>
+        </div>
+        @if (ViewBag.Errors != null)
+        {
+            <div class="">
+                <ul class="text-danger">
+                    @foreach (string error in ViewBag.Errors)
+                    {
+                        <li>@error</li>
+                    }
+                </ul>
+            </div>
+        }
+    </form>
+</main>
