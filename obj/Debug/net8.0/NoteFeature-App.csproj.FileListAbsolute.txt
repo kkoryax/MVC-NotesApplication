@@ -167,3 +167,4 @@ D:\Users\Orachun.W\Desktop\Orachun\25-dev-repo\NoteFeature-App\NoteFeature-App\b
 D:\Users\Orachun.W\Desktop\Orachun\25-dev-repo\NoteFeature-App\NoteFeature-App\bin\Debug\net8.0\runtimes\browser\lib\net8.0\System.Text.Encodings.Web.dll
 D:\Users\Orachun.W\Desktop\Orachun\25-dev-repo\NoteFeature-App\NoteFeature-App\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
 D:\Users\Orachun.W\Desktop\Orachun\25-dev-repo\NoteFeature-App\NoteFeature-App\obj\Debug\net8.0\NoteFeat.6C27DEE2.Up2Date
+D:\Users\Orachun.W\Desktop\Orachun\25-dev-repo\NoteFeature-App\NoteFeature-App\obj\Debug\net8.0\NoteFeature-App.sourcelink.json

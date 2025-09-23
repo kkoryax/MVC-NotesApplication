@@ -1,34 +1,37 @@
-﻿@{
+﻿@model NoteFeature_App.Models.NoteModel
+
+@{
     ViewData["Title"] = "Edit";
 }
 
 <main>
     <h1 class="user-select-none">Edit Note</h1>
 
-    <form action="edit" method="post">
+    <form action="/edit/@Model.NoteId" method="post">
+        <input type="hidden" name="NoteId" value="@Model.NoteId" />
         <div class="mb-3">
             <label for="NoteTitle" class="form-label">
                 Title<span class="text-danger">*</span>
             </label>
-            <input class="form-control" id="NoteTitle" name="NoteTitle" type="text" placeholder="โปรดใส่ชื่อเรื่องที่ต้องการ" />
+            <input class="form-control" id="NoteTitle" name="NoteTitle" type="text" value="@Model.NoteTitle" placeholder="โปรดใส่ชื่อเรื่องที่ต้องการ" />
         </div>
         <div class="mb-3">
             <label for="NoteContent" class="form-label">
                 Content<span class="text-danger">*</span>
             </label>
-            <textarea id="NoteContent" name="NoteContent" class="form-control" placeholder="กรุณาใส่เนื้อหาที่ต้องการของคุณ" style="height: 150px"></textarea>
+            <textarea id="NoteContent" name="NoteContent" class="form-control" placeholder="กรุณาใส่เนื้อหาที่ต้องการของคุณ" style="height: 150px">@Model.NoteContent</textarea>
         </div>
         <div class="mb-3">
-            <label for="isPinned">
-                <input type="checkbox" id="isPinned" value="true" class="form-check-input" />
+            <label for="IsPinned">
+                <input type="checkbox" id="IsPinned" name="IsPinned" value="true" class="form-check-input" @(Model.IsPinned == true ? "checked" : "") />
                 Pin this note
             </label>
         </div>
 
         <div class="d-flex flex-row justify-content-between">
             <button class="btn btn-success" type="submit">
-                <i class="bi bi-plus-lg"></i>
-                New
+                <i class="bi bi-save"></i>
+                Save
             </button>
             <a class="btn btn-primary" href="/">
                 Back

@@ -1,4 +1,5 @@
-﻿using NoteFeature_App.Data;
+﻿using NoteFeature_App.Models.NotePagination;
+using NoteFeature_App.Data;
 using NoteFeature_App.Models;
 using Services.Helpers;
 
@@ -13,6 +14,7 @@ namespace NoteFeature_App.Repositories
         void AddNote(NoteModel? note);
         void UpdateNote(NoteModel? note);
         void DeleteNote(Guid? noteId);
+        NotePagination GetListNotePagination(NotePagination pagination);
 
     }
 
@@ -61,12 +63,6 @@ namespace NoteFeature_App.Repositories
             note.NoteId = Guid.NewGuid();
             note.FlagActive = true;
 
-            if (note.IsPinned == null)
-            {
-                note.IsPinned = false;
-            }
-            note.IsPinned = true;
-
                 _db.Notes.Add(note);
 
             _db.SaveChanges();
@@ -93,8 +89,12 @@ namespace NoteFeature_App.Repositories
             //UPDATE VALUE
             note_find_by_id.NoteTitle = note.NoteTitle;
             note_find_by_id.NoteContent = note.NoteContent;
-            note_find_by_id.IsPinned = note.IsPinned;
             note_find_by_id.UpdatedAt = DateTime.Now;
+
+            if (note.IsPinned == true)
+            {
+                note_find_by_id.IsPinned = true;
+            }
 
             _db.Notes.Update(note_find_by_id);
             _db.SaveChanges();
@@ -121,6 +121,53 @@ namespace NoteFeature_App.Repositories
 
             _db.Notes.Update(note_find_by_id);
             _db.SaveChanges();
+        }
+
+        public NotePagination GetListNotePagination(NotePagination pagination)
+        {
+            NotePagination Notes = new NotePagination();
+
+            var perPage = pagination.PerPage;
+            var skip = pagination.Offset;
+            var search = pagination.Search ?? string.Empty;
+
+            var sort = pagination.Sort ?? "CreatedAt desc";
+
+            var fromDate = pagination.FromDate.Date;
+            var toDate = pagination.ToDate.HasValue ? pagination.ToDate.Value.Date : DateTime.MaxValue.Date;
+
+            var query = _db.Notes.AsQueryable();
+
+            query = query.Where(n => n.FlagActive == true);
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(n => n.NoteTitle.Contains(search) || n.NoteContent.Contains(search));
+            }
+            if (fromDate != null)
+            {
+                query = query.Where(n => n.CreatedAt.Date >= fromDate);
+            }
+            if (toDate != DateTime.MaxValue.Date)
+            {
+                query = query.Where(n => n.CreatedAt.Date <= toDate);
+            }
+
+            // Order: pinned first, then latest by (UpdatedAt coalesced to CreatedAt)
+            query = query
+                        .OrderByDescending(n => n.IsPinned == true)
+                        .ThenByDescending(n => (n.UpdatedAt ?? n.CreatedAt));
+
+            Notes.Total = query.Count();
+
+            var result = query
+                        .Skip(skip)
+                        .Take(perPage)
+                        .AsEnumerable()
+                        .ToList();
+            Notes.Notes = result;
+
+            return Notes;
         }
     }
 }

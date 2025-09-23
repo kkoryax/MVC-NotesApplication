@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NoteFeature_App.Models;
 using NoteFeature_App.Repositories;
+using NoteFeature_App.Models.NotePagination;
 
 namespace NoteFeature_App.Controllers.Note
 {
@@ -19,10 +20,16 @@ namespace NoteFeature_App.Controllers.Note
         {
             return View();
         }
-        [Route("detail")]
-        public IActionResult Detail()
+        [Route("detail/{noteId}")]
+        public IActionResult Detail(Guid? noteId)
         {
-            return View();
+            if (noteId == null)
+            {
+                return NotFound();
+            }
+
+            var note = _noteRepo.GetNoteByID(noteId).FirstOrDefault();
+            return View(note);
         }
         [Route("create")]
         [HttpGet]
@@ -83,10 +90,69 @@ namespace NoteFeature_App.Controllers.Note
             return RedirectToAction("Index");
 
         }
-        [Route("delete")]
-        public IActionResult Delete()
+        [Route("delete/{noteId}")]
+        [HttpPost]
+        public IActionResult Delete(Guid? noteId)
         {
-            return View();
+            if (noteId == null)
+            {
+                return NotFound();
+            }
+            if (!ModelState.IsValid)
+            {
+                List<NoteModel> notes = _noteRepo.GetAllNote();
+
+                ViewBag.Notes = notes;
+                ViewBag.Errors = ModelState.Values.SelectMany(e => e.Errors).Select(e => e.ErrorMessage).ToList();
+
+                return View();
+            }
+
+            _noteRepo.DeleteNote(noteId);
+
+            return RedirectToAction("Index");
+        }
+
+        [Route("/get-note-list")]
+        [HttpGet]
+        public JsonResult GetNoteList(NotePagination pagination)
+        {
+            try
+            {
+                if (pagination == null) pagination = new NotePagination();
+                pagination.Offset = pagination.Page <= 1 ? 0 : pagination.Offset;
+
+                var result = _noteRepo.GetListNotePagination(pagination);
+
+                var notesDto = result.Notes.Select(n => new
+                {
+                    noteId = n.NoteId,
+                    noteTitle = n.NoteTitle,
+                    noteContent = n.NoteContent,
+                    isPinned = n.IsPinned == true,
+                    createdAt = n.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
+                    updatedAt = n.UpdatedAt.HasValue ? n.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm") : null
+                }).ToList();
+
+                return Json(new
+                {
+                    success = true,
+                    notes = notesDto,
+                    total = result.Total
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = InnerException(ex)
+                });
+            }
+        }
+        protected string InnerException(Exception ex)
+        {
+            return (ex.InnerException != null) ? InnerException(ex.InnerException) : ex.Message;
         }
     }
 }

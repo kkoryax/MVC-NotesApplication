@@ -1,0 +1,24 @@
+﻿@using NoteFeature_App.Models;
+@model NoteModel
+
+@{
+    ViewData["Title"] = "Detail";
+}
+
+<div class="user-select-none">
+    <div>
+        <small class="text-muted">
+            <i class="bi bi-calendar3"></i>
+            <span class="pl-5">created at</span>
+            @Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+            @if (@Model.UpdatedAt != null)
+            {
+                <span class="pl-5"> | latest updated at</span>
+                @Model.UpdatedAt?.ToString("yyyy-MM-dd HH:mm")
+            }
+        </small>
+    </div>
+    <h1>@Model.NoteTitle</h1>
+    <hr />
+    <p>@Model.NoteContent</p>
+</div>
