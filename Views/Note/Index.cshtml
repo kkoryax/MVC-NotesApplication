@@ -1,6 +1,4 @@
-﻿
-
-@{
+﻿@{
     ViewData["Title"] = "Home";
 }
 
@@ -17,31 +15,28 @@
     <!-- filter -->
     <form method="get" action="" class="row g-3 mb-4">
         <div class="col-md-4">
-            <label for="">Search</label>
-            <input id="" name="" value=""  class="form-control" type="text" placeholder="ค้นหาโดยชื่อเรื่องหรือเนื้อหา" />
+            <label for="filterSearch" class="user-select-none">Search</label>
+            <input id="filterSearch" name="filterSearch" class="form-control" type="text" placeholder="ค้นหาโดยชื่อเรื่องหรือเนื้อหา" />
         </div>
 
         <div class="col-md-2">
-            <label for="">Sort by</label>
-            <select class="form-select" name="SortDirection">
-                <option id="" value="" selected="">Newest to oldest</option>
-                <option id="" value="" selected="">Oldest to Newest</option>
+            <label for="filterSort" class="user-select-none">Sort by</label>
+            <select id="filterSort" class="form-select" name="SortDirection">
+                <option value="CreatedAt desc" selected>Newest to oldest</option>
+                <option value="CreatedAt asc">Oldest to Newest</option>
             </select>
         </div>
 
         <div class="col-md-2">
-            <label>From</label>
-            <input id="filterDateFrom" name="" value=""  class="form-control" type="date" />
+            <label for="filterDateFrom" class="user-select-none">From</label>
+            <input id="filterDateFrom" name="FromDate" class="form-control" type="date" />
         </div>
 
         <div class="col-md-2">
-            <label>To</label>
-            <input id="filterDateTo" name="" value="" class="form-control" type="date" />
+            <label for="filterDateTo" class="user-select-none">To</label>
+            <input id="filterDateTo" name="ToDate" class="form-control" type="date" />
         </div>
 
-        <div class="col-md-1 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary">Search</button>
-        </div>
         <hr />
     </form>
 

@@ -13,22 +13,22 @@ var note = {
         note.setupDeleteModal();
         note.getNoteList(true);
 
-        $("filterSearch").on("change", function () {
+        $("#filterSearch").on("input", function () {
             listObj.page = 1;
             note.getNoteList(true);
         });
 
-        $("filterSort").on("change", function () {
+        $("#filterSort").on("change", function () {
             listObj.page = 1;
             note.getNoteList(true);
         });
 
-        $("filterDateFrom").on("change", function () {
+        $("#filterDateFrom").on("change", function () {
             listObj.page = 1;
             note.getNoteList(true);
         });
 
-        $("filterDateTo").on("change", function () {
+        $("#filterDateTo").on("change", function () {
             listObj.page = 1;
             note.getNoteList(true);
         });
@@ -36,15 +36,17 @@ var note = {
     getNoteList: function (isRender = false) {
         var data =
         {
-            perPage: listObj.perPage,
-            page: listObj.page,
-            offset: listObj.offset,
-            total: listObj.total,
+            PerPage: listObj.perPage,
+            Page: listObj.page,
+            Offset: listObj.offset,
+            Total: listObj.total,
             Search: $("#filterSearch").val(),
             Sort: $("#filterSort").val(),
-            DateFrom: $("#filterDateFrom").val(),
-            DateTo: $("#filterDateTo").val()
+            FromDate: $("#filterDateFrom").val(),
+            ToDate: $("#filterDateTo").val()
         }
+        
+        console.log('Filter data being sent:', data);
         $.ajax(
             {
                 type: "GET",

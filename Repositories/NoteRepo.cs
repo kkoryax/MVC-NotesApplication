@@ -153,12 +153,20 @@ namespace NoteFeature_App.Repositories
                 query = query.Where(n => n.CreatedAt.Date <= toDate);
             }
 
-            // Order: pinned first, then latest by (UpdatedAt coalesced to CreatedAt)
-            query = query
+            // Order query
+            if (sort == "CreatedAt desc")
+            {
+                query = query
                         .OrderByDescending(n => n.IsPinned == true)
                         .ThenByDescending(n => (n.UpdatedAt ?? n.CreatedAt));
+            } else
+            {
+                query = query
+                        .OrderByDescending(n => n.IsPinned == true)
+                        .ThenBy(n => (n.UpdatedAt ?? n.CreatedAt));
+            }
 
-            Notes.Total = query.Count();
+                Notes.Total = query.Count();
 
             var result = query
                         .Skip(skip)
