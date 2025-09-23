@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using NoteFeature_App.Models.User;
+using System.ComponentModel.DataAnnotations;
 
 namespace NoteFeature_App.Models.Note
 {
@@ -27,5 +28,13 @@ namespace NoteFeature_App.Models.Note
         public DateTime? UpdatedAt { get; set; }
 
         public bool FlagActive { get; set; } = true;
+
+
+        ///Add relation to UserModel
+        [Required]
+        public Guid UserId { get; set; }
+        public UserModel? User { get; set; }
+
     }
+
 }

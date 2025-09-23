@@ -1,0 +1,63 @@
+﻿@{
+    Layout = "~/Views/Account/_AccountLayout.cshtml";
+    ViewData["Title"] = "Login";
+}
+<main class="d-flex align-items-center justify-content-center vh-100">
+    <div class="border p-5 w-45">
+        <h1 class="text-center mb-5">
+            <i class="bi bi-journal-text"></i>
+            Notes Application
+        </h1>
+        <h3 class="text-center mb-3">Sign In</h3>
+
+        <form action="" method="post">
+            <div class="mb-3">
+                <label for="Email">Email</label>
+                <input class="form-control" id="Email" name="Email" type="email" placeholder="อีเมล" />
+            </div>
+
+            <div class="mb-3 position-relative">
+                <label for="Password">Password</label>
+                <input class="form-control pe-5" id="Password" name="Password" type="password" placeholder="รหัสผ่าน" />
+                <span style="cursor: pointer; position: absolute; top: 50%; right: 12px; transform: translateY(-10%);" onclick="togglePassword()">
+                    <i class="bi bi-eye fs-5" id="PasswordToggle"></i>
+                </span>
+            </div>
+
+            <div class="mb-3">
+                <a href="home" class="btn btn-primary w-100">Login</a>
+            </div>
+        </form>
+        <div class="d-flex flex-row justify-content-between">
+            <span> ยังไม่มีบัญชี? 
+                <a href="/register" class="align-self-end text-decoration-none">สมัครบัญชีใหม่</a>
+            </span>
+            <a href="/" class="align-self-end text-decoration-none">ลืมรหัสผ่าน?</a>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+        });
+        function togglePassword() {
+            const passwordField = document.getElementById('Password');
+            const passwordToggle = document.getElementById('PasswordToggle');
+
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                passwordToggle.classList.remove('bi-eye');
+                passwordToggle.classList.add('bi-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                passwordToggle.classList.remove('bi-eye-slash');
+                passwordToggle.classList.add('bi-eye');
+            }
+        }
+    </script>
+
+}
+

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace NoteFeature_App.Controllers.Login
+namespace NoteFeature_App.Controllers.Account
 {
     public class LoginController : Controller
     {
@@ -8,7 +8,7 @@ namespace NoteFeature_App.Controllers.Login
         [Route("/")]
         public IActionResult Index()
         {
-            return View();
+            return View("~/Views/Account/Login/Index.cshtml");
         }
     }
 }

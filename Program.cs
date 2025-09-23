@@ -3,8 +3,8 @@ using NoteFeature_App.Repositories;
 using NoteFeature_App.Data;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddControllersWithViews();
 
+builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDBContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
@@ -34,4 +34,4 @@ if (app.Environment.IsProduction())
        pattern: "{controller=Login}/{action=Index}");
 }
 
-    app.Run();
+app.Run();
