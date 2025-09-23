@@ -94,9 +94,12 @@ namespace NoteFeature_App.Repositories
             if (note.IsPinned == true)
             {
                 note_find_by_id.IsPinned = true;
+            } else
+            {
+                note_find_by_id.IsPinned = false;
             }
 
-            _db.Notes.Update(note_find_by_id);
+                _db.Notes.Update(note_find_by_id);
             _db.SaveChanges();
         }
 
