@@ -1,8 +1,7 @@
-﻿using NoteFeature_App.Models;
-using System.Drawing;
+﻿using System.Drawing;
 //Pagination template from P'TAR project
 
-namespace NoteFeature_App.Models.NotePagination
+namespace NoteFeature_App.Models.Note
 {
     public class NotePagination
     {

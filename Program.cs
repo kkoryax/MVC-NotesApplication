@@ -22,4 +22,16 @@ app.UseStaticFiles();
 app.UseRouting();
 app.MapControllers();
 
-app.Run();
+if (app.Environment.IsProduction())
+{
+    app.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Login}/{action=Index}");
+} else
+{
+    app.MapControllerRoute(
+       name: "default",
+       pattern: "{controller=Login}/{action=Index}");
+}
+
+    app.Run();

@@ -1,0 +1,29 @@
+﻿@{
+    Layout = "_LoginLayout.cshtml";
+    ViewData["Title"] = "Login";
+}
+<main class="d-flex align-items-center justify-content-center vh-100">
+    <div class="border p-5 w-45">
+        <h1 class="text-center mb-3">
+            <i class="bi bi-journal-text"></i>
+            Notes Application
+        </h1>
+        <h3 class="text-center mb-4">Sign In</h3>
+
+        <form action="" method="post">
+            <div class="mb-3">
+                <label for="Email">Email</label>
+                <input class="form-control" id="Email" name="Email" type="email" placeholder="อีเมล" />
+            </div>
+
+            <div class="mb-3">
+                <label for="Password">Password</label>
+                <input class="form-control" id="Password" name="Password" type="password" placeholder="รหัสผ่าน" />
+            </div>
+
+            <div class="mb-3">
+                <a href="home" class="btn btn-primary w-100">Login</a>
+            </div>
+        </form>
+    </div>
+</main>

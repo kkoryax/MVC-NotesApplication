@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using NoteFeature_App.Models;
+using NoteFeature_App.Models.Note;
 
 namespace NoteFeature_App.Data
 {

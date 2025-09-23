@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace NoteFeature_App.Models
+namespace NoteFeature_App.Models.Note
 {
     public class NoteModel
     {

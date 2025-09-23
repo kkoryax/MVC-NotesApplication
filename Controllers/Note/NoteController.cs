@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using NoteFeature_App.Models;
 using NoteFeature_App.Repositories;
-using NoteFeature_App.Models.NotePagination;
+using NoteFeature_App.Models.Note;
 
 namespace NoteFeature_App.Controllers.Note
 {
@@ -14,7 +13,6 @@ namespace NoteFeature_App.Controllers.Note
             _noteRepo = noteRepo;
         }
 
-        [Route("/")]
         [Route("home")]
         public IActionResult Index()
         {

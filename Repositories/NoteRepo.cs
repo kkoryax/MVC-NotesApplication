@@ -1,7 +1,6 @@
-﻿using NoteFeature_App.Models.NotePagination;
-using NoteFeature_App.Data;
-using NoteFeature_App.Models;
+﻿using NoteFeature_App.Data;
 using Services.Helpers;
+using NoteFeature_App.Models.Note;
 
 namespace NoteFeature_App.Repositories
 {
