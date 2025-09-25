@@ -1,14 +1,11 @@
-﻿@{
-    Layout = "~/Views/User/_UserLayout.cshtml";
-    ViewData["Title"] = "Login";
-}
-<main class="d-flex align-items-center justify-content-center vh-100">
+﻿@* Back up register page *@
+@* <main class="d-flex align-items-center justify-content-center vh-100">
     <div class="border p-5 w-45">
-        <h1 class="text-center mb-5">
+        <h1 class="text-center mb-3">
             <i class="bi bi-journal-text"></i>
             Notes Application
         </h1>
-        <h3 class="text-center mb-3">เข้าสู่ระบบ</h3>
+        <h3 class="text-center mb-4">สมัครบัญชี</h3>
 
         @if (ViewBag.Errors != null)
         {
@@ -22,7 +19,7 @@
             </div>
         }
 
-        <form action="/login" method="post">
+        <form action="/register" method="post">
             <div class="mb-3">
                 <label for="Email">Email</label>
                 <input class="form-control" id="Email" name="Email" type="email" placeholder="อีเมล" />
@@ -36,17 +33,21 @@
                 </span>
             </div>
 
+            <div class="mb-3 position-relative">
+                <label for="ConfirmPassword">Confirm Password</label>
+                <input class="form-control pe-5" id="ConfirmPassword" name="ConfirmPassword" type="password" placeholder="รหัสผ่าน" />
+                <span style="cursor: pointer; position: absolute; top: 50%; right: 12px; transform: translateY(-10%);" onclick="toggleConfirmPassword()">
+                    <i class="bi bi-eye fs-5" id="ConfirmPasswordToggle"></i>
+                </span>
+            </div>
+
             <div class="mb-3">
-                <button type="submit" class="btn btn-primary w-100">เข้าสู่ระบบ</button>
+                <button type="submit" class="btn btn-success w-100">สร้างบัญชี</button>
             </div>
         </form>
-        @* <div class="d-flex flex-row justify-content-between">
-            <span>
-                ยังไม่มีบัญชี?
-                <a href="/register" class="align-self-end text-decoration-none">สมัครบัญชีใหม่</a>
-            </span>
-            <a href="/" class="align-self-end text-decoration-none">ลืมรหัสผ่าน?</a>
-        </div> *@
+        <div>
+            <a href="/login" class="btn btn-primary w-100">ย้อนกลับ</a>
+        </div>
     </div>
 </main>
 
@@ -70,7 +71,19 @@
                 passwordToggle.classList.add('bi-eye');
             }
         }
+        function toggleConfirmPassword() {
+            const confirmPasswordField = document.getElementById('ConfirmPassword');
+            const confirmPasswordToggle = document.getElementById('ConfirmPasswordToggle');
+            if (confirmPasswordField.type === 'password') {
+                confirmPasswordField.type = 'text';
+                confirmPasswordToggle.classList.remove('bi-eye');
+                confirmPasswordToggle.classList.add('bi-eye-slash');
+            } else {
+                confirmPasswordField.type = 'password';
+                confirmPasswordToggle.classList.remove('bi-eye-slash');
+                confirmPasswordToggle.classList.add('bi-eye');
+            }
+        }
     </script>
 
-}
-
+} *@

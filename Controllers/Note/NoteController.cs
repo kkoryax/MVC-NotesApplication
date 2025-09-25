@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NoteFeature_App.Repositories;
 using NoteFeature_App.Models.Note;
+using NoteFeature_App.Helpers;
 
 namespace NoteFeature_App.Controllers.Note
 {
@@ -27,6 +28,12 @@ namespace NoteFeature_App.Controllers.Note
             }
 
             var note = _noteRepo.GetNoteByID(noteId).FirstOrDefault();
+
+            ViewBag.CreatedByUserEmail = note.CreatedByUser?.Email;
+            ViewBag.UpdatedByUserEmail = note.UpdatedByUser?.Email;
+            ViewBag.CreatedByUserId = note.CreatedByUserId;
+            ViewBag.UpdatedByUserId = note.UpdatedByUserId;
+
             return View(note);
         }
         [Route("create")]
@@ -48,6 +55,9 @@ namespace NoteFeature_App.Controllers.Note
 
                 return View();
             }
+
+            string? currentUserId = AuthHelper.GetCurrentUserId(HttpContext);
+            note.CreatedByUserId = Guid.Parse(currentUserId);
 
             _noteRepo.AddNote(note);
             return RedirectToAction("Index");
@@ -129,7 +139,11 @@ namespace NoteFeature_App.Controllers.Note
                     noteContent = n.NoteContent,
                     isPinned = n.IsPinned == true,
                     createdAt = n.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
-                    updatedAt = n.UpdatedAt.HasValue ? n.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm") : null
+                    createdByUserId = n.CreatedByUserId,
+                    createdByUserEmail = n.CreatedByUser?.Email,
+                    updatedAt = n.UpdatedAt.HasValue ? n.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm") : null,
+                    updatedByUserId = n.UpdatedByUserId,
+                    updatedByUserEmail = n.UpdatedByUser?.Email,
                 }).ToList();
 
                 return Json(new

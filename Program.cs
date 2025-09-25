@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NoteFeature_App.Repositories;
 using NoteFeature_App.Data;
+using NoteFeature_App.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 app.UseRouting();
+
+app.UseMiddleware<JwtMiddleware>();
+
 app.MapControllers();
 
 if (app.Environment.IsProduction())

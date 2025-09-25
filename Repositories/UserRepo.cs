@@ -1,5 +1,7 @@
-﻿using NoteFeature_App.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using NoteFeature_App.Data;
 using NoteFeature_App.Models.DTO;
+using NoteFeature_App.Models.Note;
 using NoteFeature_App.Models.User;
 using Services.Helpers;
 using System.ComponentModel.DataAnnotations;
@@ -12,8 +14,11 @@ namespace NoteFeature_App.Repositories
         //Action Method List
         List<UserModel> GetAllUser();
         List<UserModel> GetUserByID(Guid? userId);
+        UserModel? GetUserByEmail(string email);
+        void DeleteUser(Guid? userId);
         bool AddUser(RegisterDto? registerDTO);
         bool ValidateUser(string email, string password);
+        UserPagination GetListUserPagination(UserPagination pagination);
 
     }
 
@@ -29,7 +34,7 @@ namespace NoteFeature_App.Repositories
         #endregion
         public List<UserModel> GetAllUser()
         {
-            throw new NotImplementedException();
+            return _db.Users.Where(n => n.FlagActive == true).ToList();
         }
 
         public List<UserModel> GetUserByID(Guid? userId)
@@ -40,6 +45,16 @@ namespace NoteFeature_App.Repositories
             }
 
             return _db.Users.Where(u => u.UserId == userId && u.FlagActive == true).ToList();
+        }
+
+        public UserModel? GetUserByEmail(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return null;
+            }
+
+            return _db.Users.FirstOrDefault(u => u.Email == email && u.FlagActive == true);
         }
 
         public bool AddUser(RegisterDto? registerDTO)
@@ -64,6 +79,7 @@ namespace NoteFeature_App.Repositories
                 Email = registerDTO.Email,
                 Password = BCrypt.Net.BCrypt.HashPassword(registerDTO.Password),
                 CreatedAt = DateTime.Now,
+                Role = registerDTO.Role,
                 FlagActive = true
             };
 
@@ -71,6 +87,27 @@ namespace NoteFeature_App.Repositories
             _db.SaveChanges();
 
             return true;
+        }
+        public void DeleteUser(Guid? userId)
+        {
+            if (userId == null)
+            {
+                throw new ArgumentNullException(nameof(userId));
+            }
+
+            //GET NOTE BY ID
+            UserModel? user_find_by_id = _db.Users.FirstOrDefault(n => n.UserId == userId);
+
+            if (user_find_by_id == null)
+            {
+                throw new ArgumentException("ไม่พบผู้ใช้ที่ต้องการลบ");
+            }
+
+            //SOFT DELETE
+            user_find_by_id.FlagActive = false;
+
+            _db.Users.Update(user_find_by_id);
+            _db.SaveChanges();
         }
 
         public bool ValidateUser(string email, string password)
@@ -82,5 +119,62 @@ namespace NoteFeature_App.Repositories
             }
             return BCrypt.Net.BCrypt.Verify(password, user.Password);
         }
+
+        public UserPagination GetListUserPagination(UserPagination pagination)
+        {
+            UserPagination Users = new UserPagination();
+
+            var perPage = pagination.PerPage;
+            var skip = pagination.Offset;
+            var search = pagination.Search ?? string.Empty;
+
+            var sort = pagination.Sort ?? "CreatedAt desc";
+
+            var fromDate = pagination.FromDate.Date;
+            var toDate = pagination.ToDate.HasValue ? pagination.ToDate.Value.Date : DateTime.MaxValue.Date;
+
+            var query = _db.Users
+                            .AsQueryable();
+
+            query = query.Where(n => n.FlagActive == true);
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(n => n.Email.Contains(search));
+            }
+            if (fromDate != null)
+            {
+                query = query.Where(n => n.CreatedAt.Date >= fromDate);
+            }
+            if (toDate != DateTime.MaxValue.Date)
+            {
+                query = query.Where(n => n.CreatedAt.Date <= toDate);
+            }
+
+            // Order query
+            // Order query
+            if (sort == "CreatedAt desc")
+            {
+                query = query
+                        .OrderByDescending(n => (n.UpdatedAt ?? n.CreatedAt));
+            }
+            else
+            {
+                query = query
+                        .OrderBy(n => (n.UpdatedAt ?? n.CreatedAt));
+            }
+
+            Users.Total = query.Count();
+
+            var result = query
+                        .Skip(skip)
+                        .Take(perPage)
+                        .AsEnumerable()
+                        .ToList();
+            Users.Users = result;
+
+            return Users;
+        }
+
     }
 }

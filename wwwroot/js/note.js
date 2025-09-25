@@ -46,7 +46,6 @@ var note = {
             ToDate: $("#filterDateTo").val()
         }
         
-        console.log('Filter data being sent:', data);
         $.ajax(
             {
                 type: "GET",
@@ -60,8 +59,6 @@ var note = {
                     if (res.success) {
                         const $container = $("#noteListContainer");
                         $container.empty();
-
-                        console.log("Response from server:", res);
 
                         if (res.notes && res.notes.length > 0) {
                             res.notes.forEach(n => {
@@ -79,9 +76,14 @@ var note = {
                                             </h5>
                                             <p class="card-text flex-grow-1 user-select-none">${n.noteContent}</p>
                                             <div class="d-flex justify-content-between align-items-center mt-3">
-                                                <small class="text-muted user-select-none">
-                                                    <i class="bi bi-calendar3"></i> ${n.createdAt}
-                                                </small>
+                                                <div class="d-flex flex-column">
+                                                    <small class="text-muted user-select-none">
+                                                        <i class="bi bi-calendar3"></i> ${n.createdAt}
+                                                    </small>
+                                                    <small class="text-muted user-select-none">
+                                                        <i class="bi bi-person"></i> ${n.createdByUserEmail}
+                                                    </small>
+                                                </div>
                                                 <div class="d-flex align-items-center">
                                                     <a href="/detail/${n.noteId}" class="btn btn-outline-primary btn-sm me-1" title="Detail">
                                                         <i class="bi bi-eye"></i>
@@ -103,8 +105,8 @@ var note = {
                             
                             // Add click event listener for delete buttons
                             $('.delete-btn').off('click').on('click', function() {
-                                console.log('Delete button clicked!');
-                                console.log('Button data:', $(this).data());
+                                //console.log('Delete button clicked!');
+                                //console.log('Button data:', $(this).data());
                             });
                         } else {
                             $container.append('<div class="col-12"><p class="text-center">No notes available.</p></div>');
@@ -114,8 +116,6 @@ var note = {
                         pagination.totalItems = listObj.total;
                         pagination.currentPage = listObj.page;
                         pagination.rowsPerPage = listObj.perPage;
-
-                        console.log(document.getElementById("noteListContainer"));
 
                         if (isRender) {
                             pagination.render();
@@ -131,27 +131,23 @@ var note = {
     },
     setupDeleteModal: function() {
         var deleteModal = document.getElementById('deleteModal');
-        console.log('Setting up delete modal:', deleteModal);
         
         if (deleteModal) {
             deleteModal.addEventListener('show.bs.modal', function (event) {
-                console.log('Modal is opening...');
                 var button = event.relatedTarget;
                 var noteId = button.getAttribute('data-note-id');
                 var noteTitle = button.getAttribute('data-note-title');
                 var form = document.getElementById('deleteForm');
                 var message = document.getElementById('deleteModalMessage');
 
-                console.log('Note ID:', noteId, 'Note Title:', noteTitle);
-
                 if (form) {
                     form.action = '/delete/' + noteId;
-                    console.log('Form action set to:', form.action);
+                    //console.log('Form action set to:', form.action);
                 }
 
                 if (message) {
                     message.textContent = 'Are you sure you want to delete the note "' + noteTitle + '"?';
-                    console.log('Message set:', message.textContent);
+                    //console.log('Message set:', message.textContent);
                 }
             });
         } else {
