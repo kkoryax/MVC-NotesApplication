@@ -14,13 +14,16 @@
         <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid d-flex align-items-center clearfix">
                 <!-- Sidebar toggle for mobile -->
-                <button class="btn btn-outline-primary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">
-                    <i class="bi bi-list"></i>
-                </button>
-                <a class="navbar-brand d-flex mb-0 h1" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-journal-text"></i>
-                    <span class="ms-2 user-select-none">Notes Application</span>
-                </a>
+                <div class="d-flex flex-row justify-content-between w-100 px-4">
+                    <button class="btn btn-outline-primary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <a class="navbar-brand d-flex mb-0 h1" asp-area="" asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-journal-text"></i>
+                        <span class="ms-2 user-select-none">Notes Application</span>
+                    </a>
+                    <a href="/login" class="btn btn-primary">Logout</a>
+                </div>
             </div>
         </nav>
     </header>
@@ -46,10 +49,7 @@
                 <div class="offcanvas-body">
                     <ul class="nav nav-pills flex-column w-100">
                         <li class="nav-item mb-2">
-                            <a class="nav-link text-dark" href="/home"><i class="bi bi-house-door me-2"></i>My Notes</a>
-                        </li>
-                        <li class="nav-item mb-2">
-                            <a class="nav-link text-dark" href="/create"><i class="bi bi-journal me-2"></i>Create</a>
+                            <a class="nav-link text-dark" href="/home"><i class="bi bi-house-door me-2"></i>Dashboard</a>
                         </li>
                     </ul>
                 </div>

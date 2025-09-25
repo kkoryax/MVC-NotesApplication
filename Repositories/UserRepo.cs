@@ -2,6 +2,7 @@
 using NoteFeature_App.Models.DTO;
 using NoteFeature_App.Models.User;
 using Services.Helpers;
+using System.ComponentModel.DataAnnotations;
 
 namespace NoteFeature_App.Repositories
 {
@@ -11,7 +12,7 @@ namespace NoteFeature_App.Repositories
         //Action Method List
         List<UserModel> GetAllUser();
         List<UserModel> GetUserByID(Guid? userId);
-        void AddUser(RegisterDto? registerDTO);
+        bool AddUser(RegisterDto? registerDTO);
         bool ValidateUser(string email, string password);
 
     }
@@ -41,7 +42,7 @@ namespace NoteFeature_App.Repositories
             return _db.Users.Where(u => u.UserId == userId && u.FlagActive == true).ToList();
         }
 
-        public void AddUser(RegisterDto? registerDTO)
+        public bool AddUser(RegisterDto? registerDTO)
         {
             if (registerDTO == null)
             {
@@ -49,6 +50,13 @@ namespace NoteFeature_App.Repositories
             }
 
             ValidationHelper.ModelValidation(registerDTO);
+
+            var check_unique_user = _db.Users.FirstOrDefault(s => s.Email == registerDTO.Email && s.FlagActive == true);
+
+            if (check_unique_user != null)
+            {
+                return false;
+            };
 
             var user = new UserModel
             {
@@ -61,6 +69,8 @@ namespace NoteFeature_App.Repositories
 
             _db.Users.Add(user);
             _db.SaveChanges();
+
+            return true;
         }
 
         public bool ValidateUser(string email, string password)

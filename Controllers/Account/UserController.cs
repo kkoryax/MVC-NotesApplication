@@ -60,7 +60,13 @@ namespace NoteFeature_App.Controllers.Account
                 return View();
             }
 
-            _userRepo.AddUser(registerDTO);
+            bool result = _userRepo.AddUser(registerDTO);
+
+            if (!result)
+            {
+                ViewBag.Errors = new List<string> { "อีเมลนี้ถูกใช้งานแล้วในระบบ" };
+                return View();
+            }
 
             return RedirectToAction("login");
         }

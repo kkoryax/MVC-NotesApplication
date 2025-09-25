@@ -17,6 +17,7 @@
                 <span class="pl-5"> | latest updated at</span>
                 @Model.UpdatedAt?.ToString("yyyy-MM-dd HH:mm")
             }
+            <span>@Model.CreatedByUser</span>
         </small>
     </div>
     <h1>@Model.NoteTitle</h1>
