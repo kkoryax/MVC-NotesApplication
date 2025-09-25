@@ -10,6 +10,8 @@ builder.Services.AddDbContext<ApplicationDBContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
+builder.Services.AddAuthorization();
+
 builder.Services.AddScoped<INoteRepo, NoteRepo>();
 builder.Services.AddScoped<IUserRepo, UserRepo>();
 
@@ -24,6 +26,8 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseMiddleware<JwtMiddleware>();
+
+app.UseAuthorization();
 
 app.MapControllers();
 

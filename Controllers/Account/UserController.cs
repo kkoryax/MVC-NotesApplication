@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using NoteFeature_App.Models.DTO;
 using NoteFeature_App.Models.User;
 using NoteFeature_App.Repositories;
-using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace NoteFeature_App.Controllers.Account
 {
@@ -83,12 +84,14 @@ namespace NoteFeature_App.Controllers.Account
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        [Authorize(Roles = "Admin")]
         [Route("register")]
         [HttpGet]
         public IActionResult Register()
         {
             return View();
         }
+        [Authorize(Roles = "Admin")]
         [Route("register")]
         [HttpPost]
         public IActionResult Register(RegisterDto? registerDTO)
@@ -119,6 +122,8 @@ namespace NoteFeature_App.Controllers.Account
             Response.Cookies.Delete("jwt_token");
             return RedirectToAction("Login");
         }
+
+        [Authorize(Roles = "Admin")]
         [Route("user-manager")]
         [HttpGet]
         public IActionResult UserManager()
@@ -129,6 +134,7 @@ namespace NoteFeature_App.Controllers.Account
              return View(users);
         }
 
+        [Authorize(Roles = "Admin")]
         [Route("/get-user-list")]
         [HttpGet]
         public JsonResult GetNoteList(UserPagination pagination)
@@ -169,6 +175,7 @@ namespace NoteFeature_App.Controllers.Account
             return (ex.InnerException != null) ? InnerException(ex.InnerException) : ex.Message;
         }
 
+        [Authorize(Roles = "Admin")]
         [Route("user-manager/delete/{userId}")]
         public IActionResult Delete(Guid? userId)
         {

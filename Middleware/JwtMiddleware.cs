@@ -1,4 +1,6 @@
 using NoteFeature_App.Helpers;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace NoteFeature_App.Middleware
 {
@@ -19,10 +21,35 @@ namespace NoteFeature_App.Middleware
             {
                 if (JwtHelper.ValidateToken(token, out var principal))
                 {
-                    // เก็บข้อมูล user ใน context
-                    context.Items["UserId"] = JwtHelper.GetUserIdFromToken(token);
-                    context.Items["UserEmail"] = JwtHelper.GetUserEmailFromToken(token);
-                    context.Items["UserRole"] = JwtHelper.GetUserRoleFromToken(token);
+                    var userId = JwtHelper.GetUserIdFromToken(token);
+                    var userEmail = JwtHelper.GetUserEmailFromToken(token);
+                    var userRole = JwtHelper.GetUserRoleFromToken(token);
+
+                    context.Items["UserId"] = userId;
+                    context.Items["UserEmail"] = userEmail;
+                    context.Items["UserRole"] = userRole;
+
+                    var claims = new List<Claim>();
+
+                    if (!string.IsNullOrWhiteSpace(userId))
+                    {
+                        claims.Add(new Claim(ClaimTypes.NameIdentifier, userId));
+                        claims.Add(new Claim(JwtRegisteredClaimNames.Sub, userId));
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(userEmail))
+                    {
+                        claims.Add(new Claim(ClaimTypes.Email, userEmail));
+                        claims.Add(new Claim(JwtRegisteredClaimNames.Email, userEmail));
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(userRole))
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, userRole));
+                    }
+
+                    var identity = new ClaimsIdentity(claims, "Jwt", ClaimTypes.Email, ClaimTypes.Role);
+                    context.User = new ClaimsPrincipal(identity);
                 }
             }
 

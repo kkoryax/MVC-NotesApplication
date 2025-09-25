@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using NoteFeature_App.Repositories;
-using NoteFeature_App.Models.Note;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NoteFeature_App.Helpers;
+using NoteFeature_App.Models.Note;
+using NoteFeature_App.Repositories;
+using System.Security.Claims;
 
 namespace NoteFeature_App.Controllers.Note
 {
@@ -14,11 +16,14 @@ namespace NoteFeature_App.Controllers.Note
             _noteRepo = noteRepo;
         }
 
+        [Authorize]
         [Route("home")]
         public IActionResult Index()
         {
             return View();
         }
+
+        [Authorize]
         [Route("detail/{noteId}")]
         public IActionResult Detail(Guid? noteId)
         {
@@ -36,12 +41,16 @@ namespace NoteFeature_App.Controllers.Note
 
             return View(note);
         }
+
+        [Authorize]
         [Route("create")]
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
+
+        [Authorize]
         [Route("create")]
         [HttpPost]
         public IActionResult Create(NoteModel note)
@@ -62,6 +71,8 @@ namespace NoteFeature_App.Controllers.Note
             _noteRepo.AddNote(note);
             return RedirectToAction("Index");
         }
+
+        [Authorize]
         [Route("edit/{noteId}")]
         [HttpGet]
         public IActionResult Edit(Guid? noteId)
@@ -83,8 +94,19 @@ namespace NoteFeature_App.Controllers.Note
 
             NoteModel? note = _noteRepo.GetNoteByID(noteId).FirstOrDefault();
 
+            var isAdmin = User.IsInRole("Admin");
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var isOwner = note.CreatedByUserId.ToString() == currentUserId;
+
+            if (!isAdmin && !isOwner)
+            {
+                return Forbid();
+            }
+
             return View(note);
         }
+
+        [Authorize]
         [Route("edit/{noteId}")]
         [HttpPost]
         public IActionResult Edit (NoteModel note)
@@ -94,10 +116,24 @@ namespace NoteFeature_App.Controllers.Note
                 return View();
             }
 
+            var existing = _noteRepo.GetNoteByID(note.NoteId).FirstOrDefault();
+            if (existing == null)
+            {
+                return NotFound();
+            }
+
+            var isAdmin = User.IsInRole("Admin");
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var isOwner = existing.CreatedByUserId.ToString() == currentUserId;
+
+            if (!isAdmin && !isOwner) return Forbid();
+
             _noteRepo.UpdateNote(note);
             return RedirectToAction("Index");
 
         }
+
+        [Authorize]
         [Route("delete/{noteId}")]
         [HttpPost]
         public IActionResult Delete(Guid? noteId)
@@ -116,11 +152,27 @@ namespace NoteFeature_App.Controllers.Note
                 return View();
             }
 
+            var note = _noteRepo.GetNoteByID(noteId).FirstOrDefault();
+            if (note == null)
+            {
+                return NotFound();
+            }
+
+            var isAdmin = User.IsInRole("Admin");
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var isOwner = note.CreatedByUserId.ToString() == currentUserId;
+
+            if (!isAdmin && !isOwner)
+            {
+                return Forbid();
+            }
+
             _noteRepo.DeleteNote(noteId);
 
             return RedirectToAction("Index");
         }
 
+        [Authorize]
         [Route("/get-note-list")]
         [HttpGet]
         public JsonResult GetNoteList(NotePagination pagination)
