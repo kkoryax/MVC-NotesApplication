@@ -1,16 +1,16 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using NoteFeature_App.Data.Identity;
+﻿using Microsoft.EntityFrameworkCore;
 using NoteFeature_App.Models.Note;
+using NoteFeature_App.Models.User;
 
 namespace NoteFeature_App.Data
 {
-    public class ApplicationDBContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
+    public class ApplicationDBContext : DbContext
     {
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options)
         {
         }
 
         public DbSet<NoteModel> Notes { get; set; }
+        public DbSet<UserModel> Users { get; set; }
     }
 }

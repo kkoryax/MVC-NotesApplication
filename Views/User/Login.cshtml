@@ -1,5 +1,5 @@
 ﻿@{
-    Layout = "~/Views/Account/_AccountLayout.cshtml";
+    Layout = "~/Views/User/_UserLayout.cshtml";
     ViewData["Title"] = "Login";
 }
 <main class="d-flex align-items-center justify-content-center vh-100">
@@ -8,9 +8,21 @@
             <i class="bi bi-journal-text"></i>
             Notes Application
         </h1>
-        <h3 class="text-center mb-3">Sign In</h3>
+        <h3 class="text-center mb-3">เข้าสู่ระบบ</h3>
 
-        <form action="" method="post">
+        @if (ViewBag.Errors != null)
+        {
+            <div class="mt-3">
+                <ul class="text-danger">
+                    @foreach (string error in ViewBag.Errors)
+                    {
+                        <li>@error</li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <form action="/login" method="post">
             <div class="mb-3">
                 <label for="Email">Email</label>
                 <input class="form-control" id="Email" name="Email" type="email" placeholder="อีเมล" />
@@ -25,11 +37,12 @@
             </div>
 
             <div class="mb-3">
-                <a href="home" class="btn btn-primary w-100">Login</a>
+                <button type="submit" class="btn btn-primary w-100">Login</button>
             </div>
         </form>
         <div class="d-flex flex-row justify-content-between">
-            <span> ยังไม่มีบัญชี? 
+            <span>
+                ยังไม่มีบัญชี?
                 <a href="/register" class="align-self-end text-decoration-none">สมัครบัญชีใหม่</a>
             </span>
             <a href="/" class="align-self-end text-decoration-none">ลืมรหัสผ่าน?</a>

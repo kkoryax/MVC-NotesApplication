@@ -10,6 +10,7 @@ builder.Services.AddDbContext<ApplicationDBContext>(
 );
 
 builder.Services.AddScoped<INoteRepo, NoteRepo>();
+builder.Services.AddScoped<IUserRepo, UserRepo>();
 
 var app = builder.Build();
 
@@ -26,12 +27,12 @@ if (app.Environment.IsProduction())
 {
     app.MapControllerRoute(
         name: "default",
-        pattern: "{controller=Login}/{action=Index}");
+        pattern: "{controller=Account}/{action=Login}");
 } else
 {
     app.MapControllerRoute(
        name: "default",
-       pattern: "{controller=Login}/{action=Index}");
+       pattern: "{controller=Account}/{action=Login}");
 }
 
 app.Run();

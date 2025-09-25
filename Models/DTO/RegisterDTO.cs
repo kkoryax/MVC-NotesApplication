@@ -1,12 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace NoteFeature_App.Models.User
+namespace NoteFeature_App.Models.DTO
 {
-    public class UserModel
+    public class RegisterDto
     {
-        [Key]
-        public Guid UserId { get; set; }
-
         [Required(ErrorMessage = "โปรดระบุอีเมลของคุณ")]
         [EmailAddress(ErrorMessage = "กรุณาใส่อีเมลที่ถูกต้อง")]
         public string Email { get; set; }
@@ -14,9 +11,11 @@ namespace NoteFeature_App.Models.User
         [Required(ErrorMessage = "กรุณาระบุรหัสผ่าน")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
-        public string? Role { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public DateTime? UpdatedAt { get; set; }
-        public bool? FlagActive { get; set; }
+
+        [Required(ErrorMessage = "กรุณายืนยันรหัสผ่าน")]
+        [DataType(DataType.Password)]
+        [Compare("Password", ErrorMessage = "รหัสผ่านไม่ตรงกัน")]
+        public string ConfirmPassword { get; set; }
     }
+
 }
