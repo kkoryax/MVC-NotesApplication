@@ -13,6 +13,7 @@ var note = {
         note.setupDetailModal();
         note.setupEditMode();
         note.setupDeleteModal();
+        note.setupPermissionDeniedModal();
         note.getNoteList(true);
 
         $("#filterSearch").on("input", function () {
@@ -94,10 +95,16 @@ var note = {
                                                     </button>
                                                     ${n.canDelete ? `
                                                     <button type="button" class="btn btn-outline-danger btn-sm delete-btn" data-bs-toggle="modal"
-                                                    data-bs-target="#deleteModal" data-note-id="${n.noteId}" data-note-title="${n.noteTitle}" title="Delete">
-                                                        <i class="bi bi-trash"></i>
+                                                        data-bs-target="#deleteModal" data-note-id="${n.noteId}" data-note-title="${n.noteTitle}" title="Delete">
+                                                            <i class="bi bi-trash"></i>
                                                     </button>
-                                                    ` : ''}
+                                                    ` : `
+                                                    <button type="button" class="btn btn-outline-danger btn-sm delete-btn" data-bs-toggle="modal"
+                                                        data-bs-target="#permissionDeniedModal" data-note-id="${n.noteId}" data-note-title="${n.noteTitle}" title="Delete">
+                                                            <i class="bi bi-trash"></i>
+                                                    </button>
+                                                    `}
+                                                    
                                                 </div>
                                             </div>
                                         </div>
@@ -149,7 +156,6 @@ var note = {
             });
         }
     },
-
     resetModal: function () {
         // Reset to view mode
         $('#editMode').hide();
@@ -188,6 +194,7 @@ var note = {
                     if (note.isPinned) {
                         $('#modalNotePinned').show();
                     }
+       
                 } else {
                     console.error('Failed to load note detail:', res.message);
                 }
@@ -256,7 +263,7 @@ var note = {
                     note.switchToViewMode();
 
                     // Show success message
-                    note.showNotification('success', 'Note updated successfully!');
+                    //note.showNotification('success', 'Note updated successfully!');
                 } else {
                     note.showEditErrors(res.errors);
                 }
@@ -277,15 +284,15 @@ var note = {
         $('#editErrors').html(errorHtml).show();
     },
 
-    showNotification: function (type, message) {
-        Swal.fire({
-            icon: type,
-            title: type === 'success' ? 'Success!' : 'Error!',
-            text: message,
-            timer: 2000,
-            showConfirmButton: false
-        });
-    },
+    //showNotification: function (type, message) {
+    //    Swal.fire({
+    //        icon: type,
+    //        title: type === 'success' ? 'Success!' : 'Error!',
+    //        text: message,
+    //        timer: 2000,
+    //        showConfirmButton: false
+    //    });
+    //},
     setupDeleteModal: function() {
         var deleteModal = document.getElementById('deleteModal');
         
@@ -309,6 +316,23 @@ var note = {
             });
         } else {
             console.error('Delete modal element not found!');
+        }
+    },
+    setupPermissionDeniedModal: function () {
+        var permissionDeniedModal = document.getElementById('permissionDeniedModal');
+
+        if (permissionDeniedModal) {
+            permissionDeniedModal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                var noteTitle = button ? button.getAttribute('data-note-title') : '';
+                var message = document.getElementById('permissionDeniedModalMessage');
+
+                if (message) {
+                    message.textContent = 'You not have permission to delete the note "' + noteTitle + '".';
+                }
+            });
+        } else {
+            console.error('Permission denied modal element not found!');
         }
     },
     onPageChange(currentPage, rowsPerPage, offset) {
