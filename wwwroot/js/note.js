@@ -157,15 +157,15 @@ var note = {
         }
     },
     resetModal: function () {
-        // Reset to view mode
-        $('#editMode').hide();
-        $('#viewMode').show();
-        $('#editButtons').hide();
-        $('#viewButtons').show();
-        $('#editErrors').hide();
-        
-        // Hide edit button by default
-        $('#editToggleBtn').hide();
+        // Clear form and errors; keep edit mode as the only mode
+        $('#editErrors').hide().empty();
+        $('#editNoteId').val('');
+        $('#editNoteTitle').val('');
+        $('#editNoteContent').val('');
+        $('#editIsPinned').prop('checked', false);
+        // Ensure inputs are enabled and Save visible by default
+        $('#editForm :input').prop('disabled', false);
+        $('#saveEditBtn').show();
     },
     loadNoteDetail: function (noteId) {
         $.ajax({
@@ -175,17 +175,28 @@ var note = {
                 if (res.success) {
                     var note = res.note;
 
+                    // Header info
                     $('#modalNoteTitle').text(note.noteTitle);
-                    $('#modalNoteContent').text(note.noteContent);
                     $('#modalCreatedAt').text('Created: ' + note.createdAt);
                     $('#modalCreatedBy').text('Created by ' + note.createdByUserEmail);
-                    
-                    $('#editNoteId').val(note.noteId);
 
+                    // Populate edit form directly
+                    $('#editNoteId').val(note.noteId);
+                    $('#editNoteTitle').val(note.noteTitle);
+                    $('#editNoteContent').val(note.noteContent);
+                    $('#editIsPinned').prop('checked', !!note.isPinned);
+
+                    // Permissions: disable form and hide Save when cannot edit
                     if (note.canEdit) {
-                        $('#editToggleBtn').show();
+                        $('#editForm :input').prop('disabled', false);
+                        $('#saveEditBtn').show();
+                        $('#cancelEditBtn').show();
+                        $('#editIsPinnedBox').show();
                     } else {
-                        $('#editToggleBtn').hide();
+                        $('#editForm :input').prop('disabled', true);
+                        $('#saveEditBtn').hide();
+                        $('#cancelEditBtn').hide();
+                        $('#editIsPinnedBox').hide();
                     }
 
                     if (note.updatedAt) {
@@ -193,6 +204,8 @@ var note = {
                     }
                     if (note.isPinned) {
                         $('#modalNotePinned').show();
+                    } else {
+                        $('#modalNotePinned').hide();
                     }
        
                 } else {
@@ -205,43 +218,17 @@ var note = {
         });
     },
     setupEditMode: function () {
-        // Toggle Edit Mode
-        $('#editToggleBtn').on('click', function () {
-            note.switchToEditMode();
-        });
-
-        // Cancel Edit
         $('#cancelEditBtn').on('click', function () {
-            note.switchToViewMode();
+            var modalEl = document.getElementById('noteDetailModal');
+            if (modalEl) {
+                var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modal.hide();
+            }
         });
 
-        // Save Edit
         $('#saveEditBtn').on('click', function () {
             note.saveNote();
         });
-    },
-
-    switchToEditMode: function () {
-        $('#viewMode').hide();
-        $('#editMode').show();
-        $('#viewButtons').hide();
-        $('#editButtons').show();
-
-        var noteTitle = $('#modalNoteTitle').text();
-        var noteContent = $('#modalNoteContent').text();
-        var isPinned = $('#modalNotePinned').is(':visible');
-
-        $('#editNoteTitle').val(noteTitle);
-        $('#editNoteContent').val(noteContent);
-        $('#editIsPinned').prop('checked', isPinned);
-    },
-
-    switchToViewMode: function () {
-        $('#editMode').hide();
-        $('#viewMode').show();
-        $('#editButtons').hide();
-        $('#viewButtons').show();
-        $('#editErrors').hide();
     },
 
     saveNote: function () {
@@ -258,11 +245,11 @@ var note = {
             data: formData,
             success: function (res) {
                 if (res.success) {
-                    // Update view mode with new data
+                    // Update modal data and refresh list so pin icons reflect
                     note.loadNoteDetail(formData.NoteId);
-                    note.switchToViewMode();
+                    note.getNoteList(false);
 
-                    // Show success message
+                    // Show success message (optional)
                     //note.showNotification('success', 'Note updated successfully!');
                 } else {
                     note.showEditErrors(res.errors);
@@ -283,16 +270,6 @@ var note = {
 
         $('#editErrors').html(errorHtml).show();
     },
-
-    //showNotification: function (type, message) {
-    //    Swal.fire({
-    //        icon: type,
-    //        title: type === 'success' ? 'Success!' : 'Error!',
-    //        text: message,
-    //        timer: 2000,
-    //        showConfirmButton: false
-    //    });
-    //},
     setupDeleteModal: function() {
         var deleteModal = document.getElementById('deleteModal');
         
