@@ -88,6 +88,7 @@ namespace NoteFeature_App.Repositories
 
             return true;
         }
+
         public void DeleteUser(Guid? userId)
         {
             if (userId == null)
