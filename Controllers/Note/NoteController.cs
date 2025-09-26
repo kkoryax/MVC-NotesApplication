@@ -41,6 +41,54 @@ namespace NoteFeature_App.Controllers.Note
 
             return View(note);
         }
+        [Authorize]
+        [Route("note-details/{noteId}")]
+        [HttpGet]
+        public JsonResult NoteDetails(Guid? noteId)
+        {
+            if (noteId == null)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Note ID is required."
+                });
+            }
+            var note = _noteRepo.GetNoteByID(noteId).FirstOrDefault();
+            if (note == null)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Note not found."
+                });
+            }
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var isAdmin = User.IsInRole("Admin");
+            var isOwner = note.CreatedByUserId.ToString() == currentUserId;
+
+            var noteDto = new
+            {
+                noteId = note.NoteId,
+                noteTitle = note.NoteTitle,
+                noteContent = note.NoteContent,
+                isPinned = note.IsPinned == true,
+                createdAt = note.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
+                createdByUserId = note.CreatedByUserId,
+                createdByUserEmail = note.CreatedByUser?.Email,
+                updatedAt = note.UpdatedAt.HasValue ? note.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm") : null,
+                updatedByUserId = note.UpdatedByUserId,
+                updatedByUserEmail = note.UpdatedByUser?.Email,
+                isAdmin = isAdmin,
+                isOwner = isOwner,
+                canEdit = isAdmin || isOwner
+            };
+            return Json(new
+            {
+                success = true,
+                note = noteDto
+            }); 
+        }
 
         [Authorize]
         [Route("create")]
@@ -184,6 +232,9 @@ namespace NoteFeature_App.Controllers.Note
 
                 var result = _noteRepo.GetListNotePagination(pagination);
 
+                var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var isAdmin = User.IsInRole("Admin");
+
                 var notesDto = result.Notes.Select(n => new
                 {
                     noteId = n.NoteId,
@@ -196,6 +247,9 @@ namespace NoteFeature_App.Controllers.Note
                     updatedAt = n.UpdatedAt.HasValue ? n.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm") : null,
                     updatedByUserId = n.UpdatedByUserId,
                     updatedByUserEmail = n.UpdatedByUser?.Email,
+                    isAdmin = isAdmin,
+                    isOwner = n.CreatedByUserId.ToString() == currentUserId,
+                    canDelete = isAdmin || n.CreatedByUserId.ToString() == currentUserId
                 }).ToList();
 
                 return Json(new
@@ -218,5 +272,7 @@ namespace NoteFeature_App.Controllers.Note
         {
             return (ex.InnerException != null) ? InnerException(ex.InnerException) : ex.Message;
         }
+
+       
     }
 }

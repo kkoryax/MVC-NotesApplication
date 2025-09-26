@@ -24,6 +24,7 @@ namespace NoteFeature_App.Controllers.Account
         {
             return View();
         }
+
         [Route("login")]
         [HttpPost]
         public IActionResult Login(string email, string password)
@@ -36,7 +37,6 @@ namespace NoteFeature_App.Controllers.Account
                 return View();
             }
             
-            // ตรวจสอบ user และดึงข้อมูล user
             var user = _userRepo.GetUserByEmail(email);
             if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
@@ -91,6 +91,7 @@ namespace NoteFeature_App.Controllers.Account
         {
             return View();
         }
+
         [Authorize(Roles = "Admin")]
         [Route("register")]
         [HttpPost]

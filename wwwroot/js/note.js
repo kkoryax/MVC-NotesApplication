@@ -10,6 +10,7 @@ const pagination = createPagination();  //Declare pagination object
 var note = {
     init: () => {
         pagination.init("pagination", "paginationPerPageSelect", listObj.total, listObj.perPage, listObj.page, note.onPageChange)
+        note.setupDetailModal();
         note.setupDeleteModal();
         note.getNoteList(true);
 
@@ -85,16 +86,17 @@ var note = {
                                                     </small>
                                                 </div>
                                                 <div class="d-flex align-items-center">
-                                                    <a href="/detail/${n.noteId}" class="btn btn-outline-primary btn-sm me-1" title="Detail">
+                                                    <button type="button" class="btn btn-outline-primary btn-sm me-1 detail-btn"
+                                                            data-bs-toggle="modal" data-bs-target="#noteDetailModal"
+                                                            data-note-id="${n.noteId}" title="View Detail">
                                                         <i class="bi bi-eye"></i>
-                                                    </a>
-                                                    <a href="/edit/${n.noteId}" class="btn btn-outline-primary btn-sm me-1" title="Edit">
-                                                        <i class="bi bi-pencil"></i>
-                                                    </a>
+                                                    </button>
+                                                    ${n.canDelete ? `
                                                     <button type="button" class="btn btn-outline-danger btn-sm delete-btn" data-bs-toggle="modal"
                                                     data-bs-target="#deleteModal" data-note-id="${n.noteId}" data-note-title="${n.noteTitle}" title="Delete">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
+                                                    ` : ''}
                                                 </div>
                                             </div>
                                         </div>
@@ -129,6 +131,55 @@ var note = {
                 }
             });
     },
+    setupDetailModal: function () {
+        var detailModal = document.getElementById('noteDetailModal');
+
+        if (detailModal) {
+            detailModal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                var noteId = button.getAttribute('data-note-id');
+
+                note.loadNoteDetail(noteId);
+            });
+        }
+    },
+
+    loadNoteDetail: function (noteId) {
+        $.ajax({
+            type: "GET",
+            url: "/note-details/" + noteId,
+            success: function (res) {
+                if (res.success) {
+                    var note = res.note;
+
+                    $('#modalNoteTitle').text(note.noteTitle);
+                    $('#modalNoteContent').text(note.noteContent);
+                    $('#modalCreatedAt').text('Created: ' + note.createdAt);
+                    $('#modalCreatedBy').text('Created by ' + note.createdByUserEmail);
+                    $('#modalEditBtn').attr('href', '/edit/' + note.noteId);
+
+                    // Show/hide Edit button based on permissions
+                    if (note.canEdit) {
+                        $('#modalEditBtn').show();
+                    } else {
+                        $('#modalEditBtn').hide();
+                    }
+
+                    if (note.updatedAt) {
+                        $('#modalUpdatedAt').text('Updated: ' + note.updatedAt).show();
+                    }
+                    if (note.isPinned) {
+                        $('#modalNotePinned').show();
+                    }
+                } else {
+                    console.error('Failed to load note detail:', res.message);
+                }
+            },
+            error: function () {
+                console.error('Error loading note detail');
+            }
+        });
+    },
     setupDeleteModal: function() {
         var deleteModal = document.getElementById('deleteModal');
         
@@ -160,5 +211,9 @@ var note = {
         listObj.offset = (currentPage - 1) * rowsPerPage;
         note.getNoteList(true);
     }
+    //Edit Button
+    //< a href = "/edit/${n.noteId}" class="btn btn-outline-primary btn-sm me-1" title = "Edit" >
+    //  <i class="bi bi-pencil"></i>
+    //</a >
 
 }
