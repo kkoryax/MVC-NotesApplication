@@ -182,6 +182,56 @@ namespace NoteFeature_App.Controllers.Note
         }
 
         [Authorize]
+        [Route("/update-note")]
+        [HttpPost]
+        public JsonResult UpdateNote(NoteModel note)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(e => e.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+
+                    return Json(new { success = false, errors = errors });
+                }
+
+                var existing = _noteRepo.GetNoteByID(note.NoteId).FirstOrDefault();
+                if (existing == null)
+                {
+                    return Json(new { success = false, errors = new[] { "Note not found." } });
+                }
+
+                // Check permissions
+                var isAdmin = User.IsInRole("Admin");
+                var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var isOwner = existing.CreatedByUserId.ToString() == currentUserId;
+
+                if (!isAdmin && !isOwner)
+                {
+                    return Json(new { success = false, errors = new[] { "You don't have permission to edit this note." } });
+                }
+
+                // Update note
+                existing.NoteTitle = note.NoteTitle;
+                existing.NoteContent = note.NoteContent;
+                existing.IsPinned = note.IsPinned;
+                existing.UpdatedAt = DateTime.Now;
+                existing.UpdatedByUserId = Guid.Parse(currentUserId);
+
+                _noteRepo.UpdateNote(existing);
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, errors = new[] { InnerException(ex) } });
+            }
+        }
+
+        [Authorize]
         [Route("delete/{noteId}")]
         [HttpPost]
         public IActionResult Delete(Guid? noteId)

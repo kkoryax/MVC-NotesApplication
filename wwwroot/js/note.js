@@ -11,6 +11,7 @@ var note = {
     init: () => {
         pagination.init("pagination", "paginationPerPageSelect", listObj.total, listObj.perPage, listObj.page, note.onPageChange)
         note.setupDetailModal();
+        note.setupEditMode();
         note.setupDeleteModal();
         note.getNoteList(true);
 
@@ -141,9 +142,25 @@ var note = {
 
                 note.loadNoteDetail(noteId);
             });
+
+            // Reset modal when hidden
+            detailModal.addEventListener('hidden.bs.modal', function () {
+                note.resetModal();
+            });
         }
     },
 
+    resetModal: function () {
+        // Reset to view mode
+        $('#editMode').hide();
+        $('#viewMode').show();
+        $('#editButtons').hide();
+        $('#viewButtons').show();
+        $('#editErrors').hide();
+        
+        // Hide edit button by default
+        $('#editToggleBtn').hide();
+    },
     loadNoteDetail: function (noteId) {
         $.ajax({
             type: "GET",
@@ -156,13 +173,13 @@ var note = {
                     $('#modalNoteContent').text(note.noteContent);
                     $('#modalCreatedAt').text('Created: ' + note.createdAt);
                     $('#modalCreatedBy').text('Created by ' + note.createdByUserEmail);
-                    $('#modalEditBtn').attr('href', '/edit/' + note.noteId);
+                    
+                    $('#editNoteId').val(note.noteId);
 
-                    // Show/hide Edit button based on permissions
                     if (note.canEdit) {
-                        $('#modalEditBtn').show();
+                        $('#editToggleBtn').show();
                     } else {
-                        $('#modalEditBtn').hide();
+                        $('#editToggleBtn').hide();
                     }
 
                     if (note.updatedAt) {
@@ -178,6 +195,95 @@ var note = {
             error: function () {
                 console.error('Error loading note detail');
             }
+        });
+    },
+    setupEditMode: function () {
+        // Toggle Edit Mode
+        $('#editToggleBtn').on('click', function () {
+            note.switchToEditMode();
+        });
+
+        // Cancel Edit
+        $('#cancelEditBtn').on('click', function () {
+            note.switchToViewMode();
+        });
+
+        // Save Edit
+        $('#saveEditBtn').on('click', function () {
+            note.saveNote();
+        });
+    },
+
+    switchToEditMode: function () {
+        $('#viewMode').hide();
+        $('#editMode').show();
+        $('#viewButtons').hide();
+        $('#editButtons').show();
+
+        var noteTitle = $('#modalNoteTitle').text();
+        var noteContent = $('#modalNoteContent').text();
+        var isPinned = $('#modalNotePinned').is(':visible');
+
+        $('#editNoteTitle').val(noteTitle);
+        $('#editNoteContent').val(noteContent);
+        $('#editIsPinned').prop('checked', isPinned);
+    },
+
+    switchToViewMode: function () {
+        $('#editMode').hide();
+        $('#viewMode').show();
+        $('#editButtons').hide();
+        $('#viewButtons').show();
+        $('#editErrors').hide();
+    },
+
+    saveNote: function () {
+        var formData = {
+            NoteId: $('#editNoteId').val(),
+            NoteTitle: $('#editNoteTitle').val(),
+            NoteContent: $('#editNoteContent').val(),
+            IsPinned: $('#editIsPinned').is(':checked')
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "/update-note",
+            data: formData,
+            success: function (res) {
+                if (res.success) {
+                    // Update view mode with new data
+                    note.loadNoteDetail(formData.NoteId);
+                    note.switchToViewMode();
+
+                    // Show success message
+                    note.showNotification('success', 'Note updated successfully!');
+                } else {
+                    note.showEditErrors(res.errors);
+                }
+            },
+            error: function () {
+                note.showEditErrors(['An error occurred while saving.']);
+            }
+        });
+    },
+
+    showEditErrors: function (errors) {
+        var errorHtml = '<ul class="mb-0">';
+        errors.forEach(function (error) {
+            errorHtml += '<li>' + error + '</li>';
+        });
+        errorHtml += '</ul>';
+
+        $('#editErrors').html(errorHtml).show();
+    },
+
+    showNotification: function (type, message) {
+        Swal.fire({
+            icon: type,
+            title: type === 'success' ? 'Success!' : 'Error!',
+            text: message,
+            timer: 2000,
+            showConfirmButton: false
         });
     },
     setupDeleteModal: function() {

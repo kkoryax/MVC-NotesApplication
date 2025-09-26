@@ -68,38 +68,88 @@
         </div>
 
     <!-- Note Detail Modal -->
-    <div class="modal fade" id="noteDetailModal" tabindex="-1" aria-labelledby="noteDetailModalLabel" aria-hidden="true">
+    <div class="modal fade" id="noteDetailModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="noteDetailModalLabel">
+                    <h5 class="modal-title">
                         <i class="bi bi-sticky text-warning me-2"></i>
                         <span id="modalNoteTitle">Note Detail</span>
                         <span id="modalNotePinned" class="ms-2" style="display: none;">
                             <i class="bi bi-pin-angle-fill text-danger"></i>
                         </span>
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
+
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <small class="text-muted">
-                            <i class="bi bi-calendar3 me-1"></i>
-                            <span id="modalCreatedAt"></span>
-                            <span id="modalUpdatedAt" class="ms-3" style="display: none;"></span>
-                            <br>
-                            <i class="bi bi-person me-1"></i>
-                            <span id="modalCreatedBy"></span>
-                        </small>
+                    <!-- View Mode -->
+                    <div id="viewMode">
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                <i class="bi bi-calendar3 me-1"></i>
+                                <span id="modalCreatedAt"></span>
+                                <span id="modalUpdatedAt" class="ms-3" style="display: none;"></span>
+                                <br>
+                                <i class="bi bi-person me-1"></i>
+                                <span id="modalCreatedBy"></span>
+                            </small>
+                        </div>
+                        <div class="border-top pt-3">
+                            <div id="modalNoteContent" class="user-select-none" style="white-space: pre-wrap;"></div>
+                        </div>
                     </div>
-                    <div class="border-top pt-3">
-                        <div id="modalNoteContent" class="user-select-none" style="white-space: pre-wrap;"></div>
+
+                    <!-- Edit Mode -->
+                    <div id="editMode" style="display: none;">
+                        <form id="editForm">
+                            <input type="hidden" id="editNoteId" name="NoteId" />
+
+                            <div class="mb-3">
+                                <label for="editNoteTitle" class="form-label">
+                                    Title <span class="text-danger">*</span>
+                                </label>
+                                <input class="form-control" id="editNoteTitle" name="NoteTitle" type="text" required />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="editNoteContent" class="form-label">
+                                    Content <span class="text-danger">*</span>
+                                </label>
+                                <textarea id="editNoteContent" name="NoteContent" class="form-control" style="height: 150px" required></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input type="checkbox" id="editIsPinned" name="IsPinned" value="true" class="form-check-input" />
+                                    <label for="editIsPinned" class="form-check-label">
+                                        Pin this note
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="editErrors" class="alert alert-danger" style="display: none;"></div>
+                        </form>
                     </div>
                 </div>
+
                 <div class="modal-footer">
-                    <a id="modalEditBtn" href="#" class="btn" style="display: none;">
-                        <i class="bi bi-pencil me-1"></i>Edit
-                    </a>
+                    <!-- View Mode Buttons -->
+                    <div id="viewButtons">
+                        <button type="button" class="btn" id="editToggleBtn" style="display: none;">
+                            <i class="bi bi-pencil me-1"></i>Edit
+                        </button>
+                    </div>
+
+                    <!-- Edit Mode Buttons -->
+                    <div id="editButtons" style="display: none;">
+                        <button type="button" class="btn btn-secondary me-2" id="cancelEditBtn">
+                            <i class="bi bi-x-circle me-1"></i>Cancel
+                        </button>
+                        <button type="button" class="btn btn-success" id="saveEditBtn">
+                            Save
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -107,7 +157,7 @@
 
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog user-select-none">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="deleteModalLabel">Delete Note</h5>
