@@ -5,11 +5,14 @@
 <main>
     <div class="d-flex justify-content-between align-items-center mb-4 user-select-none">
         <h1 class="display-5 mb-0">
-            <i class="bi bi-journal-text text-primary"></i> My Notes
+            <i class="bi bi-journal-text text-primary"></i>
+            All Notes
         </h1>
-        <a class="btn btn-success btn-lg shadow-sm" href="/create">
-            <i class="bi bi-plus-lg"></i> Add Note
-        </a>
+        <div class="d-flex gap-2">
+            <a class="btn btn-success btn-lg shadow-sm" href="/create">
+                <i class="bi bi-plus-lg"></i> Add Note
+            </a>
+        </div>
     </div>
 
     <!-- filter -->
@@ -87,17 +90,6 @@
 </main>
 
 @section Scripts {
-    <style>
-        .note-card {
-            transition: box-shadow 0.2s, transform 0.2s;
-        }
-
-            .note-card:hover {
-                box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
-                transform: translateY(-4px) scale(1.02);
-            }
-    </style>
-
 <!-- Script Pagination from P'TAR Project -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="~/js/pagination.js?ver=@DateTime.Now.Ticks.ToString()"></script>

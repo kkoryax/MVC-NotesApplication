@@ -1,4 +1,5 @@
 ﻿@using NoteFeature_App.Models;
+@using NoteFeature_App.Models.Note
 @model NoteModel
 
 @{
@@ -16,6 +17,9 @@
                 <span class="pl-5"> | latest updated at</span>
                 @Model.UpdatedAt?.ToString("yyyy-MM-dd HH:mm")
             }
+            <span>
+                | created by <span>@ViewBag.CreatedByUserEmail</span>
+            </span>
         </small>
     </div>
     <h1>@Model.NoteTitle</h1>

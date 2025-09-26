@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using NoteFeature_App.Models;
+using NoteFeature_App.Models.Note;
+using NoteFeature_App.Models.User;
 
 namespace NoteFeature_App.Data
 {
@@ -10,5 +11,6 @@ namespace NoteFeature_App.Data
         }
 
         public DbSet<NoteModel> Notes { get; set; }
+        public DbSet<UserModel> Users { get; set; }
     }
 }

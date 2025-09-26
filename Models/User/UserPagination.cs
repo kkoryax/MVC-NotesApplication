@@ -1,10 +1,9 @@
-﻿using NoteFeature_App.Models;
-using System.Drawing;
+﻿using System.Drawing;
 //Pagination template from P'TAR project
 
-namespace NoteFeature_App.Models.NotePagination
+namespace NoteFeature_App.Models.User
 {
-    public class NotePagination
+    public class UserPagination
     {
         public int PerPage { get; set; } = 10;
         public int Page { get; set; } = 1;
@@ -18,7 +17,7 @@ namespace NoteFeature_App.Models.NotePagination
         public DateTime? ToDate { get; set; }
 
         // Display
-        public List<NoteModel> Notes { get; set; } = new List<NoteModel>(); //GET Note data
+        public List<UserModel> Users { get; set; } = new List<UserModel>(); //GET User data
 
     }
 }

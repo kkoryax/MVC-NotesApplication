@@ -1,6 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using NoteFeature_App.Models.User;
+using System.ComponentModel.DataAnnotations;
 
-namespace NoteFeature_App.Models
+namespace NoteFeature_App.Models.Note
 {
     public class NoteModel
     {
@@ -17,15 +18,19 @@ namespace NoteFeature_App.Models
         [Display(Name = "เนื้อหา")]
         public string? NoteContent { get; set; }
         public bool? IsPinned { get; set; } = false;
-
-        public string? CreatedBy { get; set; }
-
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-
-        public string? UpdatedBy { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
 
         public bool FlagActive { get; set; } = true;
+
+        // Foreign Keys to UserModel (simple auth)
+        public Guid? CreatedByUserId { get; set; }
+        public Guid? UpdatedByUserId { get; set; }
+
+        // Navigation properties
+        public UserModel? CreatedByUser { get; set; }
+        public UserModel? UpdatedByUser { get; set; }
     }
+
 }

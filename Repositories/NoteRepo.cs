@@ -1,6 +1,6 @@
-﻿using NoteFeature_App.Models.NotePagination;
+﻿using Microsoft.EntityFrameworkCore;
 using NoteFeature_App.Data;
-using NoteFeature_App.Models;
+using NoteFeature_App.Models.Note;
 using Services.Helpers;
 
 namespace NoteFeature_App.Repositories
@@ -46,7 +46,11 @@ namespace NoteFeature_App.Repositories
                 return null;
             }
 
-            return _db.Notes.Where(n => n.NoteId == noteId && n.FlagActive == true).ToList();
+            return _db.Notes
+                .Include(n => n.CreatedByUser)
+                .Include(n => n.UpdatedByUser)
+                .Where(n => n.NoteId == noteId && n.FlagActive == true)
+                .ToList();
         }
 
         //ADD NOTE
@@ -59,13 +63,21 @@ namespace NoteFeature_App.Repositories
 
             ValidationHelper.ModelValidation(note);
 
-            //Add default values
-            note.NoteId = Guid.NewGuid();
-            note.FlagActive = true;
+            if (note.CreatedByUserId.HasValue)
+            {
+                var user = _db.Users.FirstOrDefault(u => u.UserId == note.CreatedByUserId.Value);
+                if (user != null)
+                {
+                    note.CreatedByUser = user;
+                }
 
+                //Add default values
+                note.NoteId = Guid.NewGuid();
+                note.FlagActive = true;
                 _db.Notes.Add(note);
 
-            _db.SaveChanges();
+                _db.SaveChanges();
+            } 
         }
 
         //UPDATE NOTE
@@ -90,6 +102,16 @@ namespace NoteFeature_App.Repositories
             note_find_by_id.NoteTitle = note.NoteTitle;
             note_find_by_id.NoteContent = note.NoteContent;
             note_find_by_id.UpdatedAt = DateTime.Now;
+            note_find_by_id.UpdatedByUserId = note.UpdatedByUserId;
+
+            if (note.UpdatedByUserId.HasValue)
+            {
+                var user = _db.Users.FirstOrDefault(u => u.UserId == note.UpdatedByUserId.Value);
+                if (user != null)
+                {
+                    note_find_by_id.UpdatedByUser = user; 
+                }
+            }
 
             if (note.IsPinned == true)
             {
@@ -99,7 +121,7 @@ namespace NoteFeature_App.Repositories
                 note_find_by_id.IsPinned = false;
             }
 
-                _db.Notes.Update(note_find_by_id);
+            _db.Notes.Update(note_find_by_id);
             _db.SaveChanges();
         }
 
@@ -139,7 +161,10 @@ namespace NoteFeature_App.Repositories
             var fromDate = pagination.FromDate.Date;
             var toDate = pagination.ToDate.HasValue ? pagination.ToDate.Value.Date : DateTime.MaxValue.Date;
 
-            var query = _db.Notes.AsQueryable();
+            var query = _db.Notes
+                            .Include(n => n.CreatedByUser)
+                            .Include(n => n.UpdatedByUser)
+                            .AsQueryable();
 
             query = query.Where(n => n.FlagActive == true);
 
