@@ -67,7 +67,7 @@ var note = {
                         if (res.notes && res.notes.length > 0) {
                             res.notes.forEach(n => {
                                 const card = `
-                                <div class="col-12 col-sm-6 col-md-6 col-xl-4">
+                                <div class="col-12 col-sm-6 col-md-6 col-xl-4"">
                                     <div class="card h-150 shadow-sm border-2 note-card">
                                         <div class="card-body d-flex flex-column p-4">
                                             <h5 class="card-title mb-2 user-select-none text-truncate">
@@ -75,7 +75,7 @@ var note = {
                                                 <i class="bi bi-sticky text-warning"></i>
                                                 ${n.noteTitle}
                                                 <small class="text-muted">
-                                                    ${n.updatedAt ? '<span class="badge bg-black">edit</span>' : ''}
+                                                    ${n.updatedAt ? '<span class="badge bg-secondary">edit</span>' : ''}
                                                 </small>
                                             </h5>
                                             <p class="card-text user-select-none" style="display: overflow: hidden; line-height: 1.4; min-height: 4em;">${n.noteContent}</p>
@@ -247,8 +247,12 @@ var note = {
             data: formData,
             success: function (res) {
                 if (res.success) {
-                    // Update modal data and refresh list so pin icons reflect
-                    note.loadNoteDetail(formData.NoteId);
+                    // Close modal and refresh list
+                    var modalEl = document.getElementById('noteDetailModal');
+                    if (modalEl) {
+                        var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                        modal.hide();
+                    }
                     note.getNoteList(false);
 
                     // Show success message (optional)

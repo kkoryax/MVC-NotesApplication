@@ -148,7 +148,7 @@ namespace NoteFeature_App.Controllers.Note
 
             if (!isAdmin && !isOwner)
             {
-                return Forbid();
+                return RedirectToAction("Login", "User");
             }
 
             return View(note);
@@ -174,7 +174,10 @@ namespace NoteFeature_App.Controllers.Note
             var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var isOwner = existing.CreatedByUserId.ToString() == currentUserId;
 
-            if (!isAdmin && !isOwner) return Forbid();
+            if (!isAdmin && !isOwner)
+            {
+                return RedirectToAction("Login", "User");
+            }
 
             _noteRepo.UpdateNote(note);
             return RedirectToAction("Index");
@@ -293,7 +296,7 @@ namespace NoteFeature_App.Controllers.Note
 
             if (!isAdmin && !isOwner)
             {
-                return Forbid();
+                return RedirectToAction("Login", "User");
             }
 
             _noteRepo.DeleteNote(noteId);
