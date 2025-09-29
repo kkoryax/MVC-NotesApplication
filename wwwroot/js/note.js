@@ -13,6 +13,7 @@ var note = {
         note.setupDetailModal();
         note.setupEditMode();
         note.setupCreateModal();
+        note.applyAdvanceFilter();
         note.setupDeleteSA();
         note.setupPermissionDeniedModal();
         note.getNoteList(true);
@@ -47,7 +48,8 @@ var note = {
             Search: $("#filterSearch").val(),
             Sort: $("#filterSort").val(),
             FromDate: $("#filterDateFrom").val(),
-            ToDate: $("#filterDateTo").val()
+            ToDate: $("#filterDateTo").val(),
+            StatusFilter: selectedStatuses
         }
         $.ajax(
             {
@@ -419,6 +421,13 @@ var note = {
         listObj.perPage = rowsPerPage;
         listObj.offset = (currentPage - 1) * rowsPerPage;
         note.getNoteList(true);
+    },
+    applyAdvanceFilter: function () {
+        $('#advanceFilter').unbind('click').on('click', function () {
+            $('#advanceFilterModal').modal('hide');
+            listObj.page = 1;
+            note.getNoteList(true);
+        })
     }
     //Edit Button
     //< a href = "/edit/${n.noteId}" class="btn btn-outline-primary btn-sm me-1" title = "Edit" >
