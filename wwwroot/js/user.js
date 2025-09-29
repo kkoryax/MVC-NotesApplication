@@ -69,7 +69,7 @@ var user = {
                                     <td>${n.createdAt}</td>
                                     <td>
                                        ${
-                                            n.role === "User" ?
+                                            n.role === "User" || n.role === "Guest" ?
                                     `<button type="button" class="btn btn-outline-danger btn-sm delete-btn" 
                                     data-user-id="${n.userId}" data-user-email="${n.email}" title="Delete">
                                          <i class="bi bi-trash"></i>

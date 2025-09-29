@@ -95,10 +95,12 @@ var note = {
                                                                 data-note-id="${n.noteId}" title="View Detail">
                                                             <i class="bi bi-eye"></i>
                                                         </button>
-                                                    <button type="button" class="btn btn-outline-danger btn-sm delete-btn" 
-                                                        data-note-id="${n.noteId}" data-note-title="${n.noteTitle}" data-can-delete="${n.canDelete}" title="Delete">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
+                                                        ${n.canSeeDeleteButton ? `
+                                                         <button type="button" class="btn btn-outline-danger btn-sm delete-btn"
+                                                                data-note-id="${n.noteId}" data-note-title="${n.noteTitle}" data-can-delete="${n.canDelete}" title="Delete">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                        ` : ''}
                                                     </div>
                                                 </div>
                                             </div>

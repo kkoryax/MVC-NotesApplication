@@ -8,11 +8,14 @@
             <i class="bi bi-journal-text"></i>
             All Notes
         </h1>
-        <div class="d-flex gap-2">
-            <button type="button" class="btn btn-success btn-lg shadow-sm" data-bs-toggle="modal" data-bs-target="#createModal">
-                <i class="bi bi-plus-lg"></i> Add Note
-            </button>
-        </div> <!-- Call Modakl-->
+        @if (User.IsInRole("User") || User.IsInRole("Admin"))
+        {
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-success btn-lg shadow-sm" data-bs-toggle="modal" data-bs-target="#createModal">
+                    <i class="bi bi-plus-lg"></i> Add Note
+                </button>
+            </div> <!-- Call Modakl-->
+        }
     </div>
 
     <!-- filter -->
@@ -168,6 +171,13 @@
                                     Content <span class="text-danger">*</span>
                                 </label>
                                 <textarea id="createNoteContent" name="NoteContent" class="form-control" style="height: 200px" required></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="uploadFile"class="form-label user-select-none">
+                                    Upload files <span class="text-danger">*</span>
+                                </label>
+                                <input type="file" id="uploadFile" class="form-control"/>
                             </div>
 
                             <div class="mb-3 d-flex flex-row justify-content-between">
