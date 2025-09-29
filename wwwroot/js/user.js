@@ -1,5 +1,5 @@
 ﻿var listObj = {
-    perPage: 6,
+    perPage: 10,
     page: 1,
     offset: 0,
     total: 0
@@ -10,7 +10,7 @@ const pagination = createPagination();  //Declare pagination object
 var user = {
     init: () => {
         pagination.init("pagination", "paginationPerPageSelect", listObj.total, listObj.perPage, listObj.page, user.onPageChange)
-        user.setupDeleteModal();
+        user.setupDeleteSA();
         user.getUserList(true);
 
         $("#filterSearch").on("input", function () {
@@ -70,15 +70,10 @@ var user = {
                                     <td>
                                        ${
                                             n.role === "User" ?
-                                        `<button type="button"
-                                                class="btn btn-outline-danger btn-sm delete-btn"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#deleteModal" 
-                                                data-user-id="${n.userId}" 
-                                                data-user-title="${n.email}" 
-                                                title="Delete">
-                                            <i class="bi bi-trash"></i>
-                                        </button>`
+                                    `<button type="button" class="btn btn-outline-danger btn-sm delete-btn" 
+                                    data-user-id="${n.userId}" data-user-email="${n.email}" title="Delete">
+                                         <i class="bi bi-trash"></i>
+                                    </button>`
                                             : ""
                                         }
                                     </td>
@@ -113,30 +108,56 @@ var user = {
                 }
             });
     },
-    setupDeleteModal: function() {
-        var deleteModal = document.getElementById('deleteModal');
-        
-        if (deleteModal) {
-            deleteModal.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget;
-                var userId = button.getAttribute('data-user-id');
-                var email = button.getAttribute('data-user-title');
-                var form = document.getElementById('deleteForm');
-                var message = document.getElementById('deleteModalMessage');
+    setupDeleteSA: function () {
+        // Add click event listener for delete buttons
+        $(document).on('click', '.delete-btn', function (e) {
+            e.preventDefault();
 
-                if (form) {
-                    form.action = 'user-manager/delete/' + userId;
-                    //console.log('Form action set to:', form.action);
-                }
+            var userId = $(this).data('user-id');
+            var user_email = $(this).data('user-email');
 
-                if (message) {
-                    message.textContent = 'Are you sure you want to delete User "' + email + '"?';
-                    //console.log('Message set:', message.textContent);
+            const swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: "btn btn-danger ms-2",
+                    cancelButton: "btn btn-secondary me-2"
+                },
+                buttonsStyling: false
+            });
+
+            swalWithBootstrapButtons.fire({
+                title: "Notification",
+                text: `คุณแน่ใจหรือไม่ที่จะลบ "${user_email}"?`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "ตกลง",
+                cancelButtonText: "ยกเลิก",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Send delete request
+                    $.ajax({
+                        type: "POST",
+                        url: "user-manager/delete/" + userId,
+                        success: function (res) {
+                            swalWithBootstrapButtons.fire({
+                                title: "Notification",
+                                text: `"${user_email}" ถูกลบเรียบร้อยแล้ว`,
+                                icon: "success"
+                            });
+                            // Refresh the note list
+                            user.getUserList(false);
+                        },
+                        error: function () {
+                            swalWithBootstrapButtons.fire({
+                                title: "Notification",
+                                text: `ไม่สามารถลบ ${user_email} ได้`,
+                                icon: "error"
+                            });
+                        }
+                    });
                 }
             });
-        } else {
-            console.error('Delete modal element not found!');
-        }
+        });
     },
     onPageChange(currentPage, rowsPerPage, offset) {
         listObj.page = currentPage;
