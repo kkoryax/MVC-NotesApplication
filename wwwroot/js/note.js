@@ -12,6 +12,7 @@ var note = {
         pagination.init("pagination", "paginationPerPageSelect", listObj.total, listObj.perPage, listObj.page, note.onPageChange)
         note.setupDetailModal();
         note.setupEditMode();
+        note.setupCreateModal();
         note.setupDeleteModal();
         note.setupPermissionDeniedModal();
         note.getNoteList(true);
@@ -66,10 +67,10 @@ var note = {
                         if (res.notes && res.notes.length > 0) {
                             res.notes.forEach(n => {
                                 const card = `
-                                <div class="col-12 col-sm-6 col-md-4">
-                                    <div class="card h-100 shadow-sm border-2 note-card">
+                                <div class="col-12 col-sm-6 col-md-6 col-xl-4">
+                                    <div class="card h-150 shadow-sm border-2 note-card">
                                         <div class="card-body d-flex flex-column p-4">
-                                            <h5 class="card-title mb-2 user-select-none">
+                                            <h5 class="card-title mb-2 user-select-none text-truncate">
                                              ${n.isPinned ? '<i class="bi bi-pin-angle-fill text-danger"></i>' : ''}
                                                 <i class="bi bi-sticky text-warning"></i>
                                                 ${n.noteTitle}
@@ -77,34 +78,35 @@ var note = {
                                                     ${n.updatedAt ? '<span class="badge bg-black">edit</span>' : ''}
                                                 </small>
                                             </h5>
-                                            <p class="card-text flex-grow-1 user-select-none">${n.noteContent}</p>
-                                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                                <div class="d-flex flex-column">
-                                                    <small class="text-muted user-select-none">
-                                                        <i class="bi bi-calendar3"></i> ${n.createdAt}
-                                                    </small>
-                                                    <small class="text-muted user-select-none">
-                                                        <i class="bi bi-person"></i> ${n.createdByUserEmail}
-                                                    </small>
-                                                </div>
-                                                <div class="d-flex align-items-center">
-                                                    <button type="button" class="btn btn-outline-primary btn-sm me-1 detail-btn"
-                                                            data-bs-toggle="modal" data-bs-target="#noteDetailModal"
-                                                            data-note-id="${n.noteId}" title="View Detail">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-                                                    ${n.canDelete ? `
-                                                    <button type="button" class="btn btn-outline-danger btn-sm delete-btn" data-bs-toggle="modal"
-                                                        data-bs-target="#deleteModal" data-note-id="${n.noteId}" data-note-title="${n.noteTitle}" title="Delete">
-                                                            <i class="bi bi-trash"></i>
-                                                    </button>
-                                                    ` : `
-                                                    <button type="button" class="btn btn-outline-danger btn-sm delete-btn" data-bs-toggle="modal"
-                                                        data-bs-target="#permissionDeniedModal" data-note-id="${n.noteId}" data-note-title="${n.noteTitle}" title="Delete">
-                                                            <i class="bi bi-trash"></i>
-                                                    </button>
-                                                    `}
-                                                    
+                                            <p class="card-text user-select-none" style="display: overflow: hidden; line-height: 1.4; min-height: 4em;">${n.noteContent}</p>
+                                            <div class="mt-auto">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div class="d-flex flex-column">
+                                                        <small class="text-muted user-select-none text-truncate">
+                                                            <i class="bi bi-calendar3"></i> ${n.createdAt}
+                                                        </small>
+                                                        <small class="text-muted user-select-none text-truncate">
+                                                            <i class="bi bi-person"></i> ${n.createdByUserEmail}
+                                                        </small>
+                                                    </div>
+                                                    <div class="d-flex gap-1">
+                                                        <button type="button" class="btn btn-outline-primary btn-sm detail-btn"
+                                                                data-bs-toggle="modal" data-bs-target="#noteDetailModal"
+                                                                data-note-id="${n.noteId}" title="View Detail">
+                                                            <i class="bi bi-eye"></i>
+                                                        </button>
+                                                        ${n.canDelete ? `
+                                                        <button type="button" class="btn btn-outline-danger btn-sm delete-btn" data-bs-toggle="modal"
+                                                            data-bs-target="#deleteModal" data-note-id="${n.noteId}" data-note-title="${n.noteTitle}" title="Delete">
+                                                                <i class="bi bi-trash"></i>
+                                                        </button>
+                                                        ` : `
+                                                        <button type="button" class="btn btn-outline-danger btn-sm delete-btn" data-bs-toggle="modal"
+                                                            data-bs-target="#permissionDeniedModal" data-note-id="${n.noteId}" data-note-title="${n.noteTitle}" title="Delete">
+                                                                <i class="bi bi-trash"></i>
+                                                        </button>
+                                                        `}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -190,12 +192,12 @@ var note = {
                     if (note.canEdit) {
                         $('#editForm :input').prop('disabled', false);
                         $('#saveEditBtn').show();
-                        $('#cancelEditBtn').show();
+                        //$('#cancelEditBtn').show();
                         $('#editIsPinnedBox').show();
                     } else {
                         $('#editForm :input').prop('disabled', true);
                         $('#saveEditBtn').hide();
-                        $('#cancelEditBtn').hide();
+                        //$('#cancelEditBtn').hide();
                         $('#editIsPinnedBox').hide();
                     }
 
@@ -287,13 +289,82 @@ var note = {
                 }
 
                 if (message) {
-                    message.textContent = 'Are you sure you want to delete the note "' + noteTitle + '"?';
+                    message.textContent = 'Are you sure you want to delete this note "' + noteTitle + '"?';
                     //console.log('Message set:', message.textContent);
                 }
             });
         } else {
             console.error('Delete modal element not found!');
         }
+    },
+    setupCreateModal: function () {
+        var createModal = document.getElementById('createModal');
+
+        if (createModal) {
+            createModal.addEventListener('hidden.bs.modal', function () {
+                note.resetCreateModal();
+            });
+        }
+
+        $('#cancelCreateBtn').on('click', function () {
+            var modalEl = document.getElementById('createModal');
+            if (modalEl) {
+                var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modal.hide();
+            }
+        });
+
+        $('#saveCreateBtn').on('click', function () {
+            note.createNote();
+        });
+    },
+    resetCreateModal: function () {
+        // Clear form and errors
+        $('#createErrors').hide().empty();
+        $('#createNoteTitle').val('');
+        $('#createNoteContent').val('');
+        $('#createIsPinned').prop('checked', false);
+    },
+    createNote: function () {
+        var formData = {
+            NoteTitle: $('#createNoteTitle').val(),
+            NoteContent: $('#createNoteContent').val(),
+            IsPinned: $('#createIsPinned').is(':checked')
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "/create-note",
+            data: formData,
+            success: function (res) {
+                if (res.success) {
+                    // Close modal and refresh list
+                    var modalEl = document.getElementById('createModal');
+                    if (modalEl) {
+                        var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                        modal.hide();
+                    }
+                    note.getNoteList(false);
+                    
+                    // Show success message (optional)
+                    //note.showNotification('success', 'Note created successfully!');
+                } else {
+                    note.showCreateErrors(res.errors);
+                }
+            },
+            error: function () {
+                note.showCreateErrors(['เกิดปัญหาขัดข้อง.']);
+            }
+        });
+    },
+    showCreateErrors: function (errors) {
+        var errorHtml = '<ul class="mb-0">';
+        errors.forEach(function (error) {
+            errorHtml += '<li>' + error + '</li>';
+        });
+        errorHtml += '</ul>';
+
+        $('#createErrors').html(errorHtml).show();
     },
     setupPermissionDeniedModal: function () {
         var permissionDeniedModal = document.getElementById('permissionDeniedModal');
@@ -305,7 +376,7 @@ var note = {
                 var message = document.getElementById('permissionDeniedModalMessage');
 
                 if (message) {
-                    message.textContent = 'You not have permission to delete the note "' + noteTitle + '".';
+                    message.textContent = 'You not have permission to delete this note "' + noteTitle + '".';
                 }
             });
         } else {

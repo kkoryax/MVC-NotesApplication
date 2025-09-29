@@ -118,7 +118,7 @@ namespace NoteFeature_App.Controllers.Note
 
             _noteRepo.AddNote(note);
             return RedirectToAction("Index");
-        }
+        } //Old action method page
 
         [Authorize]
         [Route("edit/{noteId}")]
@@ -180,6 +180,37 @@ namespace NoteFeature_App.Controllers.Note
             return RedirectToAction("Index");
 
         }
+
+        [Authorize]
+        [Route("/create-note")]
+        [HttpPost]
+        public JsonResult CreateNote(NoteModel note)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(e => e.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+
+                    return Json(new { success = false, errors = errors });
+                }
+
+                string? currentUserId = AuthHelper.GetCurrentUserId(HttpContext);
+                note.CreatedByUserId = Guid.Parse(currentUserId);
+                note.CreatedAt = DateTime.Now;
+
+                _noteRepo.AddNote(note);
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, errors = new[] { InnerException(ex) } });
+            }
+        } //New method
 
         [Authorize]
         [Route("/update-note")]
