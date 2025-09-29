@@ -13,7 +13,7 @@ var note = {
         note.setupDetailModal();
         note.setupEditMode();
         note.setupCreateModal();
-        note.setupDeleteModal();
+        note.setupDeleteSA();
         note.setupPermissionDeniedModal();
         note.getNoteList(true);
 
@@ -95,17 +95,10 @@ var note = {
                                                                 data-note-id="${n.noteId}" title="View Detail">
                                                             <i class="bi bi-eye"></i>
                                                         </button>
-                                                        ${n.canDelete ? `
-                                                        <button type="button" class="btn btn-outline-danger btn-sm delete-btn" data-bs-toggle="modal"
-                                                            data-bs-target="#deleteModal" data-note-id="${n.noteId}" data-note-title="${n.noteTitle}" title="Delete">
-                                                                <i class="bi bi-trash"></i>
-                                                        </button>
-                                                        ` : `
-                                                        <button type="button" class="btn btn-outline-danger btn-sm delete-btn" data-bs-toggle="modal"
-                                                            data-bs-target="#permissionDeniedModal" data-note-id="${n.noteId}" data-note-title="${n.noteTitle}" title="Delete">
-                                                                <i class="bi bi-trash"></i>
-                                                        </button>
-                                                        `}
+                                                    <button type="button" class="btn btn-outline-danger btn-sm delete-btn" 
+                                                        data-note-id="${n.noteId}" data-note-title="${n.noteTitle}" data-can-delete="${n.canDelete}" title="Delete">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -115,11 +108,7 @@ var note = {
                                 $container.append(card);
                             });
                             
-                            // Add click event listener for delete buttons
-                            $('.delete-btn').off('click').on('click', function() {
-                                //console.log('Delete button clicked!');
-                                //console.log('Button data:', $(this).data());
-                            });
+                            // Delete button event listener is handled in setupDeleteSA()
                         } else {
                             $container.append('<div class="col-12"><p class="text-center">No notes available.</p></div>');
                         }
@@ -276,31 +265,68 @@ var note = {
 
         $('#editErrors').html(errorHtml).show();
     },
-    setupDeleteModal: function() {
-        var deleteModal = document.getElementById('deleteModal');
-        
-        if (deleteModal) {
-            deleteModal.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget;
-                var noteId = button.getAttribute('data-note-id');
-                var noteTitle = button.getAttribute('data-note-title');
-                var form = document.getElementById('deleteForm');
-                var message = document.getElementById('deleteModalMessage');
-
-                if (form) {
-                    form.action = '/delete/' + noteId;
-                    //console.log('Form action set to:', form.action);
-                }
-
-                if (message) {
-                    message.textContent = 'Are you sure you want to delete this note "' + noteTitle + '"?';
-                    //console.log('Message set:', message.textContent);
-                }
-            });
-        } else {
-            console.error('Delete modal element not found!');
-        }
-    },
+     setupDeleteSA: function () {
+         // Add click event listener for delete buttons
+         $(document).on('click', '.delete-btn', function(e) {
+             e.preventDefault();
+             
+             var noteId = $(this).data('note-id');
+             var noteTitle = $(this).data('note-title');
+             var canDelete = $(this).data('can-delete');
+             
+             if (!canDelete) {
+                 Swal.fire({
+                     title: "Notification",
+                     text: `คุณไม่มีสิทธิ์ในการลบ "${noteTitle}"`,
+                     icon: "error",
+                     confirmButtonText: "ตกลง"
+                 });
+                 return;
+             }
+             
+             const swalWithBootstrapButtons = Swal.mixin({
+                 customClass: {
+                     confirmButton: "btn btn-danger ms-2",
+                     cancelButton: "btn btn-secondary me-2"
+                 },
+                 buttonsStyling: false
+             });
+             
+             swalWithBootstrapButtons.fire({
+                 title: "Notification",
+                 text: `คุณแน่ใจหรือไม่ที่จะลบ "${noteTitle}"?`,
+                 icon: "warning",
+                 showCancelButton: true,
+                 confirmButtonText: "ตกลง",
+                 cancelButtonText: "ยกเลิก",
+                 reverseButtons: true
+             }).then((result) => {
+                 if (result.isConfirmed) {
+                     // Send delete request
+                     $.ajax({
+                         type: "POST",
+                         url: "/delete/" + noteId,
+                         success: function(res) {
+                             swalWithBootstrapButtons.fire({
+                                 title: "Notification",
+                                 text: `"${noteTitle}" ถูกลบเรียบร้อยแล้ว`,
+                                 icon: "success"
+                             });
+                             // Refresh the note list
+                             note.getNoteList(false);
+                         },
+                         error: function() {
+                             swalWithBootstrapButtons.fire({
+                                 title: "Notification",
+                                 text: `ไม่สามารถลบ ${noteTitle} ได้`,
+                                 icon: "error"
+                             });
+                         }
+                     });
+                 }
+             });
+         });
+     },
     setupCreateModal: function () {
         var createModal = document.getElementById('createModal');
 

@@ -138,7 +138,7 @@ namespace NoteFeature_App.Controllers.Account
         [Authorize(Roles = "Admin")]
         [Route("/get-user-list")]
         [HttpGet]
-        public JsonResult GetNoteList(UserPagination pagination)
+        public JsonResult GetUserList(UserPagination pagination)
         {
             try
             {
