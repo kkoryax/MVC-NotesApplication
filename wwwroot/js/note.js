@@ -49,7 +49,6 @@ var note = {
             FromDate: $("#filterDateFrom").val(),
             ToDate: $("#filterDateTo").val()
         }
-        
         $.ajax(
             {
                 type: "GET",
