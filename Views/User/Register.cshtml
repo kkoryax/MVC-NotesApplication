@@ -15,19 +15,19 @@
                 </ul>
             </div>
         }
-        <h1 class="display-5 mb-0">
+        <h1 class="display-5 mb-0 user-select-none">
             <i class="bi bi-person me-2"></i>
             Add New User
         </h1>
         <hr />
         <form action="/register" method="post">
             <div class="mb-3">
-                <label for="Email">Email</label>
+                <label for="Email" class="user-select-none">Email</label>
                 <input class="form-control" id="Email" name="Email" type="email" placeholder="อีเมล" />
             </div>
 
             <div class="mb-3 position-relative">
-                <label for="Password">Password</label>
+                <label for="Password" class="user-select-none">Password</label>
                 <input class="form-control pe-5" id="Password" name="Password" type="password" placeholder="รหัสผ่าน" />
                 <span style="cursor: pointer; position: absolute; top: 50%; right: 12px; transform: translateY(-10%);" onclick="togglePassword()">
                     <i class="bi bi-eye fs-5" id="PasswordToggle"></i>
@@ -35,7 +35,7 @@
             </div>
 
             <div class="mb-3 position-relative">
-                <label for="ConfirmPassword">Confirm Password</label>
+                <label for="ConfirmPassword" class="user-select-none">Confirm Password</label>
                 <input class="form-control pe-5" id="ConfirmPassword" name="ConfirmPassword" type="password" placeholder="รหัสผ่าน" />
                 <span style="cursor: pointer; position: absolute; top: 50%; right: 12px; transform: translateY(-10%);" onclick="toggleConfirmPassword()">
                     <i class="bi bi-eye fs-5" id="ConfirmPasswordToggle"></i>
