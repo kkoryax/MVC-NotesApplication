@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NoteFeature_App.Data;
+using NoteFeature_App.Helpers;
 using NoteFeature_App.Models.DTO;
 using NoteFeature_App.Models.Note;
 using NoteFeature_App.Models.User;
@@ -134,6 +135,8 @@ namespace NoteFeature_App.Repositories
             var fromDate = pagination.FromDate.Date;
             var toDate = pagination.ToDate.HasValue ? pagination.ToDate.Value.Date : DateTime.MaxValue.Date;
 
+            var statusFilter = FilterHelper.ParseStatusFilter(pagination.StatusFilter);
+
             var query = _db.Users
                             .AsQueryable();
 
@@ -152,7 +155,13 @@ namespace NoteFeature_App.Repositories
                 query = query.Where(n => n.CreatedAt.Date <= toDate);
             }
 
-            // Order query
+            // Apply Advance Status Filter
+            if (statusFilter != null && statusFilter.Any())
+            {
+                    query = query.Where(n => statusFilter.Contains(n.Role));
+
+            }
+
             // Order query
             if (sort == "CreatedAt desc")
             {

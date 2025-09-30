@@ -21,34 +21,20 @@
             <label for="filterSearch" class="user-select-none">Search</label>
             <input id="filterSearch" name="filterSearch" class="form-control" type="text" placeholder="ค้นหาโดยชื่ออีเมล" />
         </div>
-
-        <div class="col-md-2">
-            <label for="filterSort" class="user-select-none">Sort by</label>
-            <select id="filterSort" class="form-select" name="SortDirection">
-                <option value="CreatedAt desc" selected>Newest to oldest</option>
-                <option value="CreatedAt asc">Oldest to Newest</option>
-            </select>
+        <div class="col-md-2 d-flex align-items-center">
+            <button type="button" class="btn btn-outline-secondary" style="margin-top: 24px; width: 3rem" data-bs-toggle="modal" data-bs-target="#userAdvanceFilterModal">
+                <i class="bi bi-funnel"></i>
+            </button>
         </div>
-
-        <div class="col-md-2">
-            <label for="filterDateFrom" class="user-select-none">From</label>
-            <input id="filterDateFrom" name="FromDate" class="form-control" type="date" />
-        </div>
-
-        <div class="col-md-2">
-            <label for="filterDateTo" class="user-select-none">To</label>
-            <input id="filterDateTo" name="ToDate" class="form-control" type="date" />
-        </div>
-
         <hr />
     </form>
 
     <!-- Advance Filter Modal-->
-    @* <div class="modal fade" id="advanceFilterModal" tabindex="-1" aria-labelledby="advanceFilterModalLabel" aria-hidden="true">
+    <div class="modal fade" id="userAdvanceFilterModal" tabindex="-1" aria-labelledby="userAdvanceFilterModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title user-select-none" id="advanceFilterModalLabel">
+                    <h5 class="modal-title user-select-none" id="userAdvanceFilterModalLabel">
                         <i class="bi bi-funnel"></i>
                         Advance Filter
                     </h5>
@@ -75,21 +61,20 @@
                         </div>
                     </div>
 
-
-                    <label for="filterStatus" class="form-label user-select-none">Filter type</label>
-                    <select class="form-select" id="filterStatus" name="filterStatus" multiple="multiple">
-                        <option value="Edit">edit</option>
-                        <option value="File">file</option>
-                        <option value="Image">image</option>
+                    <label for="userFilterStatus" class="form-label user-select-none">Filter type</label>
+                    <select class="form-select" id="userFilterStatus" name="userFilterStatus" multiple="multiple">
+                        <option value="Guest">Guest</option>
+                        <option value="User">User</option>
+                        <option value="Admin">Admin</option>
                     </select>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="applyAdvanceFilter">Apply</button>
+                    <button type="button" class="btn btn-primary" id="applyUserAdvanceFilter">Apply</button>
                 </div>
             </div>
         </div>
-    </div> *@
+    </div>
 
     <table class="table">
         <tr>
@@ -137,8 +122,39 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="~/js/pagination.js?ver=@DateTime.Now.Ticks.ToString()"></script>
     <script src="~/js/user.js?ver=@DateTime.Now.Ticks.ToString()"></script>
+
+    <!-- Include select 2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <script type="text/javascript">
+
+        let selectedStatuses = [];
+
         $(document).ready(function () {
+
+             // Init select2
+         $('#userFilterStatus').select2({
+                placeholder: "เลือกประเภทฟิลเตอร์",
+                allowClear: true,
+                width: '100%',
+                dropdownParent: $('#userAdvanceFilterModal')
+            });
+
+             // ✅ ตั้งค่า selectedStatuses ตั้งแต่แรก จากค่าใน select ที่ถูก selected
+             selectedStatuses = $('#userFilterStatus').val() ? $('#userFilterStatus').val() : [];
+
+             // เมื่อ select2 เปลี่ยนค่า
+             $('#userFilterStatus').on('change', function () {
+                selectedStatuses = $(this).val() ? $(this).val() : [];
+                // console.log('Select2 changed, selectedStatuses:', selectedStatuses);
+            });
+
+            // เมื่อเปิด modal ให้ sync ค่าอีกครั้ง (optional)
+             $('#userAdvancedFilterModal').on('shown.bs.modal', function () {
+                $('#userFilterStatus').val(selectedStatuses).trigger('change');
+            });
+
             user.init();
         });
     </script>

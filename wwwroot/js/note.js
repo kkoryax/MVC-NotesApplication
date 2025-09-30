@@ -14,7 +14,6 @@ var note = {
         note.setupEditMode();
         note.setupCreateModal();
         note.setupDeleteSA();
-        note.setupPermissionDeniedModal();
         note.applyAdvanceFilter();
         note.getNoteList(true);
 
@@ -49,12 +48,8 @@ var note = {
             Sort: $("#filterSort").val(),
             FromDate: $("#filterDateFrom").val(),
             ToDate: $("#filterDateTo").val(),
-            StatusFilter: selectedStatuses.join(',')
+            StatusFilter: selectedStatuses.join(',') //join to parse array to string
         }
-        
-        console.log('Sending data to server:', data);
-        console.log('selectedStatuses:', selectedStatuses);
-        console.log('StatusFilter string:', selectedStatuses.join(','));
         $.ajax(
             {
                 type: "GET",
@@ -402,23 +397,6 @@ var note = {
         errorHtml += '</ul>';
 
         $('#createErrors').html(errorHtml).show();
-    },
-    setupPermissionDeniedModal: function () {
-        var permissionDeniedModal = document.getElementById('permissionDeniedModal');
-
-        if (permissionDeniedModal) {
-            permissionDeniedModal.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget;
-                var noteTitle = button ? button.getAttribute('data-note-title') : '';
-                var message = document.getElementById('permissionDeniedModalMessage');
-
-                if (message) {
-                    message.textContent = 'You not have permission to delete this note "' + noteTitle + '".';
-                }
-            });
-        } else {
-            console.error('Permission denied modal element not found!');
-        }
     },
     onPageChange(currentPage, rowsPerPage, offset) {
         listObj.page = currentPage;

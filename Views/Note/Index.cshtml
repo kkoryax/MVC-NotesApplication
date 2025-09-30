@@ -27,7 +27,7 @@
 
         <div class="col-md-2 d-flex align-items-center">
                 <button type="button" class="btn btn-outline-secondary" style="margin-top: 24px; width: 3rem" data-bs-toggle="modal" data-bs-target="#advanceFilterModal">
-                    :
+                    <i class="bi bi-funnel"></i>
                 </button>
         </div>
 
@@ -96,6 +96,7 @@
                     <select class="form-select" id="filterStatus" name="filterStatus" multiple="multiple">
                         <option value="Edit">Edit</option>
                         <option value="Pinned">Pinned</option>
+                         <option value="Unpinned">Unpinned</option>
                     </select>
                 </div>
                 <div class="modal-footer">
@@ -274,7 +275,7 @@
              // เมื่อ select2 เปลี่ยนค่า
              $('#filterStatus').on('change', function () {
                 selectedStatuses = $(this).val() ? $(this).val() : [];
-                console.log('Select2 changed, selectedStatuses:', selectedStatuses);
+                // console.log('Select2 changed, selectedStatuses:', selectedStatuses);
             });
 
             // เมื่อเปิด modal ให้ sync ค่าอีกครั้ง (optional)
@@ -282,7 +283,6 @@
                 $('#filterStatus').val(selectedStatuses).trigger('change');
             });
 
-        console.log(selectedStatuses);
         note.init();
     });
 

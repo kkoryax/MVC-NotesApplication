@@ -194,6 +194,10 @@ namespace NoteFeature_App.Repositories
                 {
                     query = query.Where(n => n.IsPinned == true);
                 }
+                if (statusFilter.Contains("Unpinned"))
+                {
+                    query = query.Where(n => n.IsPinned == false);
+                }
             }
 
             // Order query

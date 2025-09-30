@@ -16,6 +16,8 @@ namespace NoteFeature_App.Models.User
         public DateTime FromDate { get; set; }
         public DateTime? ToDate { get; set; }
 
+        public string? StatusFilter { get; set; } // <-- ADD Status Filter for sorting in advance filter 
+
         // Display
         public List<UserModel> Users { get; set; } = new List<UserModel>(); //GET User data
 
