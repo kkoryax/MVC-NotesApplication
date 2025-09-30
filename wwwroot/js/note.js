@@ -13,9 +13,9 @@ var note = {
         note.setupDetailModal();
         note.setupEditMode();
         note.setupCreateModal();
-        note.applyAdvanceFilter();
         note.setupDeleteSA();
         note.setupPermissionDeniedModal();
+        note.applyAdvanceFilter();
         note.getNoteList(true);
 
         $("#filterSearch").on("input", function () {
@@ -49,8 +49,12 @@ var note = {
             Sort: $("#filterSort").val(),
             FromDate: $("#filterDateFrom").val(),
             ToDate: $("#filterDateTo").val(),
-            StatusFilter: selectedStatuses
+            StatusFilter: selectedStatuses.join(',')
         }
+        
+        console.log('Sending data to server:', data);
+        console.log('selectedStatuses:', selectedStatuses);
+        console.log('StatusFilter string:', selectedStatuses.join(','));
         $.ajax(
             {
                 type: "GET",
@@ -423,11 +427,11 @@ var note = {
         note.getNoteList(true);
     },
     applyAdvanceFilter: function () {
-        $('#advanceFilter').unbind('click').on('click', function () {
+        $('#applyAdvanceFilter').unbind('click').on('click', function () {
             $('#advanceFilterModal').modal('hide');
             listObj.page = 1;
             note.getNoteList(true);
-        })
+        });
     }
     //Edit Button
     //< a href = "/edit/${n.noteId}" class="btn btn-outline-primary btn-sm me-1" title = "Edit" >

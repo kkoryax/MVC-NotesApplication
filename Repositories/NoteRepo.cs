@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NoteFeature_App.Data;
 using NoteFeature_App.Models.Note;
+using NoteFeature_App.Helpers;
 using Services.Helpers;
 
 namespace NoteFeature_App.Repositories
@@ -160,6 +161,7 @@ namespace NoteFeature_App.Repositories
 
             var fromDate = pagination.FromDate.Date;
             var toDate = pagination.ToDate.HasValue ? pagination.ToDate.Value.Date : DateTime.MaxValue.Date;
+            var statusFilter = FilterHelper.ParseStatusFilter(pagination.StatusFilter);
 
             var query = _db.Notes
                             .Include(n => n.CreatedByUser)
@@ -181,6 +183,19 @@ namespace NoteFeature_App.Repositories
                 query = query.Where(n => n.CreatedAt.Date <= toDate);
             }
 
+            // Apply Advance Status Filter
+            if (statusFilter != null && statusFilter.Any())
+            {
+                if (statusFilter.Contains("Edit"))
+                {
+                    query = query.Where(n => n.UpdatedAt.HasValue);
+                }
+                if (statusFilter.Contains("Pinned"))
+                {
+                    query = query.Where(n => n.IsPinned == true);
+                }
+            }
+
             // Order query
             if (sort == "CreatedAt desc")
             {
@@ -194,7 +209,7 @@ namespace NoteFeature_App.Repositories
                         .ThenBy(n => (n.UpdatedAt ?? n.CreatedAt));
             }
 
-                Notes.Total = query.Count();
+            Notes.Total = query.Count();
 
             var result = query
                         .Skip(skip)

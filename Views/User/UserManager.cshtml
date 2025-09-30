@@ -43,6 +43,54 @@
         <hr />
     </form>
 
+    <!-- Advance Filter Modal-->
+    @* <div class="modal fade" id="advanceFilterModal" tabindex="-1" aria-labelledby="advanceFilterModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title user-select-none" id="advanceFilterModalLabel">
+                        <i class="bi bi-funnel"></i>
+                        Advance Filter
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label for="filterSort" class="user-select-none">Sort by</label>
+                            <select id="filterSort" class="form-select" name="SortDirection">
+                                <option value="CreatedAt desc" selected>Newest to oldest</option>
+                                <option value="CreatedAt asc">Oldest to Newest</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="filterDateFrom" class="user-select-none">From</label>
+                            <input id="filterDateFrom" name="FromDate" class="form-control" type="date" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="filterDateTo" class="user-select-none">To</label>
+                            <input id="filterDateTo" name="ToDate" class="form-control" type="date" />
+                        </div>
+                    </div>
+
+
+                    <label for="filterStatus" class="form-label user-select-none">Filter type</label>
+                    <select class="form-select" id="filterStatus" name="filterStatus" multiple="multiple">
+                        <option value="Edit">edit</option>
+                        <option value="File">file</option>
+                        <option value="Image">image</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="applyAdvanceFilter">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div> *@
+
     <table class="table">
         <tr>
             <th>
