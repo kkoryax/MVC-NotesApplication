@@ -11,6 +11,7 @@ var user = {
     init: () => {
         pagination.init("pagination", "paginationPerPageSelect", listObj.total, listObj.perPage, listObj.page, user.onPageChange)
         user.setupDeleteSA();
+        user.applyUserAdvanceFilter();
         user.getUserList(true);
 
         $("#filterSearch").on("input", function () {
@@ -43,9 +44,10 @@ var user = {
             Search: $("#filterSearch").val(),
             Sort: $("#filterSort").val(),
             FromDate: $("#filterDateFrom").val(),
-            ToDate: $("#filterDateTo").val()
+            ToDate: $("#filterDateTo").val(),
+            StatusFilter: selectedStatuses.join(',') //join to parse array to string
         }
-        
+        console.log(selectedStatuses)
         $.ajax(
             {
                 type: "GET",
@@ -69,7 +71,7 @@ var user = {
                                     <td>${n.createdAt}</td>
                                     <td>
                                        ${
-                                            n.role === "User" ?
+                                            n.role === "User" || n.role === "Guest" ?
                                     `<button type="button" class="btn btn-outline-danger btn-sm delete-btn" 
                                     data-user-id="${n.userId}" data-user-email="${n.email}" title="Delete">
                                          <i class="bi bi-trash"></i>
@@ -164,6 +166,13 @@ var user = {
         listObj.perPage = rowsPerPage;
         listObj.offset = (currentPage - 1) * rowsPerPage;
         user.getUserList(true);
+    },
+    applyUserAdvanceFilter: function () {
+        $('#applyUserAdvanceFilter').unbind('click').on('click', function () {
+            $('#advanceFilterModal').modal('hide');
+            listObj.page = 1;
+            user.getUserList(true);
+        });
     }
 
 }

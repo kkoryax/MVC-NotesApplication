@@ -15,6 +15,7 @@ namespace NoteFeature_App.Models.Note
         public string? Sort { get; set; }
         public DateTime FromDate { get; set; }
         public DateTime? ToDate { get; set; }
+        public string? StatusFilter { get; set; } // <-- ADD Status Filter for sorting in advance filter 
 
         // Display
         public List<NoteModel> Notes { get; set; } = new List<NoteModel>(); //GET Note data

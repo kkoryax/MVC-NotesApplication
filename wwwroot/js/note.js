@@ -14,7 +14,7 @@ var note = {
         note.setupEditMode();
         note.setupCreateModal();
         note.setupDeleteSA();
-        note.setupPermissionDeniedModal();
+        note.applyAdvanceFilter();
         note.getNoteList(true);
 
         $("#filterSearch").on("input", function () {
@@ -47,9 +47,9 @@ var note = {
             Search: $("#filterSearch").val(),
             Sort: $("#filterSort").val(),
             FromDate: $("#filterDateFrom").val(),
-            ToDate: $("#filterDateTo").val()
+            ToDate: $("#filterDateTo").val(),
+            StatusFilter: selectedStatuses.join(',') //join to parse array to string
         }
-        
         $.ajax(
             {
                 type: "GET",
@@ -95,10 +95,12 @@ var note = {
                                                                 data-note-id="${n.noteId}" title="View Detail">
                                                             <i class="bi bi-eye"></i>
                                                         </button>
-                                                    <button type="button" class="btn btn-outline-danger btn-sm delete-btn" 
-                                                        data-note-id="${n.noteId}" data-note-title="${n.noteTitle}" data-can-delete="${n.canDelete}" title="Delete">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
+                                                        ${n.canSeeDeleteButton ? `
+                                                         <button type="button" class="btn btn-outline-danger btn-sm delete-btn"
+                                                                data-note-id="${n.noteId}" data-note-title="${n.noteTitle}" data-can-delete="${n.canDelete}" title="Delete">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                        ` : ''}
                                                     </div>
                                                 </div>
                                             </div>
@@ -396,28 +398,18 @@ var note = {
 
         $('#createErrors').html(errorHtml).show();
     },
-    setupPermissionDeniedModal: function () {
-        var permissionDeniedModal = document.getElementById('permissionDeniedModal');
-
-        if (permissionDeniedModal) {
-            permissionDeniedModal.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget;
-                var noteTitle = button ? button.getAttribute('data-note-title') : '';
-                var message = document.getElementById('permissionDeniedModalMessage');
-
-                if (message) {
-                    message.textContent = 'You not have permission to delete this note "' + noteTitle + '".';
-                }
-            });
-        } else {
-            console.error('Permission denied modal element not found!');
-        }
-    },
     onPageChange(currentPage, rowsPerPage, offset) {
         listObj.page = currentPage;
         listObj.perPage = rowsPerPage;
         listObj.offset = (currentPage - 1) * rowsPerPage;
         note.getNoteList(true);
+    },
+    applyAdvanceFilter: function () {
+        $('#applyAdvanceFilter').unbind('click').on('click', function () {
+            $('#advanceFilterModal').modal('hide');
+            listObj.page = 1;
+            note.getNoteList(true);
+        });
     }
     //Edit Button
     //< a href = "/edit/${n.noteId}" class="btn btn-outline-primary btn-sm me-1" title = "Edit" >

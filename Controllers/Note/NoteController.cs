@@ -98,7 +98,7 @@ namespace NoteFeature_App.Controllers.Note
             return View();
         }
 
-        [Authorize]
+        [Authorize(Roles = "User,Admin")]
         [Route("create")]
         [HttpPost]
         public IActionResult Create(NoteModel note)
@@ -120,7 +120,7 @@ namespace NoteFeature_App.Controllers.Note
             return RedirectToAction("Index");
         } //Old action method page
 
-        [Authorize]
+        [Authorize(Roles = "User,Admin")]
         [Route("edit/{noteId}")]
         [HttpGet]
         public IActionResult Edit(Guid? noteId)
@@ -154,7 +154,7 @@ namespace NoteFeature_App.Controllers.Note
             return View(note);
         }
 
-        [Authorize]
+        [Authorize(Roles = "User,Admin")]
         [Route("edit/{noteId}")]
         [HttpPost]
         public IActionResult Edit (NoteModel note)
@@ -184,7 +184,7 @@ namespace NoteFeature_App.Controllers.Note
 
         }
 
-        [Authorize]
+        [Authorize(Roles = "User,Admin")]
         [Route("/create-note")]
         [HttpPost]
         public JsonResult CreateNote(NoteModel note)
@@ -215,7 +215,7 @@ namespace NoteFeature_App.Controllers.Note
             }
         } //New method
 
-        [Authorize]
+        [Authorize(Roles = "User,Admin")]
         [Route("/update-note")]
         [HttpPost]
         public JsonResult UpdateNote(NoteModel note)
@@ -265,7 +265,7 @@ namespace NoteFeature_App.Controllers.Note
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "User,Admin")]
         [Route("delete/{noteId}")]
         [HttpPost]
         public IActionResult Delete(Guid? noteId)
@@ -318,6 +318,7 @@ namespace NoteFeature_App.Controllers.Note
 
                 var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 var isAdmin = User.IsInRole("Admin");
+                var isUser = User.IsInRole("User");
 
                 var notesDto = result.Notes.Select(n => new
                 {
@@ -333,7 +334,8 @@ namespace NoteFeature_App.Controllers.Note
                     updatedByUserEmail = n.UpdatedByUser?.Email,
                     isAdmin = isAdmin,
                     isOwner = n.CreatedByUserId.ToString() == currentUserId,
-                    canDelete = isAdmin || n.CreatedByUserId.ToString() == currentUserId
+                    canDelete = isAdmin || n.CreatedByUserId.ToString() == currentUserId,
+                    canSeeDeleteButton = isAdmin|| isUser
                 }).ToList();
 
                 return Json(new
@@ -352,6 +354,7 @@ namespace NoteFeature_App.Controllers.Note
                 });
             }
         }
+
         protected string InnerException(Exception ex)
         {
             return (ex.InnerException != null) ? InnerException(ex.InnerException) : ex.Message;
