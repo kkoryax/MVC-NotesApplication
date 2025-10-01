@@ -3,6 +3,7 @@ using NoteFeature_App.Data;
 using NoteFeature_App.Models.Note;
 using NoteFeature_App.Helpers;
 using Services.Helpers;
+using System.Threading.Tasks;
 
 namespace NoteFeature_App.Repositories
 {
@@ -12,7 +13,7 @@ namespace NoteFeature_App.Repositories
         //Action Method List
         List<NoteModel> GetAllNote();
         List<NoteModel> GetNoteByID(Guid? noteId);
-        void AddNote(NoteModel? note);
+        Task AddNote(NoteModel? note, List<IFormFile>? files = null);
         void UpdateNote(NoteModel? note);
         void DeleteNote(Guid? noteId);
         NotePagination GetListNotePagination(NotePagination pagination);
@@ -24,11 +25,14 @@ namespace NoteFeature_App.Repositories
     {
         #region DBSetting
         private readonly ApplicationDBContext _db;
+        private readonly IWebHostEnvironment _webHost;
 
         //DB Constructor
-        public NoteRepo(ApplicationDBContext db)
+        public NoteRepo(ApplicationDBContext db
+                , IWebHostEnvironment webHost)
         {
             _db = db;
+            _webHost = webHost;
         }
         #endregion
 
@@ -55,7 +59,7 @@ namespace NoteFeature_App.Repositories
         }
 
         //ADD NOTE
-        public void AddNote(NoteModel? note)
+        public async Task AddNote(NoteModel? note, List<IFormFile>? files)
         {
             if (note == null)
             {
@@ -73,11 +77,49 @@ namespace NoteFeature_App.Repositories
                 }
 
                 //Add default values
-                note.NoteId = Guid.NewGuid();
                 note.FlagActive = true;
+
+                /* Add Note File data */
+                note.NoteFiles = new List<NoteFile>();
+
+                string? uploadsFolder = Path.Combine(_webHost.WebRootPath, "uploads"); 
+
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                // Process uploaded files
+                if (files != null && files.Count > 0)
+                {         
+                    //loop create files
+                    foreach (var file in files)
+                    {
+                        if (file.Length > 0)
+                        {
+                            string fileName = Guid.NewGuid().ToString();
+                            string filePath = Path.Combine(uploadsFolder, fileName);
+
+                            using (FileStream stream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await file.CopyToAsync(stream);
+                            }
+
+                            note.NoteFiles.Add(new NoteFile
+                            {
+                                NoteFileId = Guid.NewGuid(),
+                                NoteId = note.NoteId,
+                                NoteFilePath = filePath,
+                                NoteFileType = file.ContentType,
+                                UploadedDate = DateTime.Now
+                            });
+                        }
+                    }
+                }
+
                 _db.Notes.Add(note);
 
-                _db.SaveChanges();
+                await _db.SaveChangesAsync();
             } 
         }
 
