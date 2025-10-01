@@ -6,6 +6,7 @@
 }
 
 const pagination = createPagination();  //Declare pagination object
+let checkDropzone; // Declare 
 
 var note = {
     init: () => {
@@ -267,6 +268,16 @@ var note = {
 
         $('#editErrors').html(errorHtml).show();
     },
+
+    showCreateErrors: function (errors) {
+        var errorHtml = '<ul class="mb-0">';
+        errors.forEach(function (error) {
+            errorHtml += '<li>' + error + '</li>';
+        });
+        errorHtml += '</ul>';
+
+        $('#createErrors').html(errorHtml).show();
+    },
      setupDeleteSA: function () {
          // Add click event listener for delete buttons
          $(document).on('click', '.delete-btn', function(e) {
@@ -356,18 +367,44 @@ var note = {
         $('#createNoteTitle').val('');
         $('#createNoteContent').val('');
         $('#createIsPinned').prop('checked', false);
+        
+        // Clear file
+        var fileInput = document.getElementById('cameraInput');
+        if (fileInput) {
+            fileInput.value = '';
+        }
+        
+        if (typeof Dropzone !== 'undefined' && Dropzone.instances.length > 0) {
+            Dropzone.instances.forEach(function(dz) {
+                if (dz.element.id === 'previewDropzone') {
+                    dz.removeAllFiles(true);
+                }
+            });
+        }
     },
-    createNote: function () {
-        var formData = {
-            NoteTitle: $('#createNoteTitle').val(),
-            NoteContent: $('#createNoteContent').val(),
-            IsPinned: $('#createIsPinned').is(':checked')
-        };
+    initCreateNote: function () {
+        $('#saveCreateBtn').unbind('click').on('click', function () {
+            const files = checkDropzone.getAcceptedFiles();
 
+            const formData = new FormData();
+            formData.append('NoteTitle', $('#createNoteTitle').val());
+            formData.append('NoteContent', $('#createNoteContent').val());
+            formData.append('IsPinned', $('#createIsPinned').is(':checked'));
+            console.log(files.length)
+            // Get files from dropzone
+            files.forEach((file, index) => {
+                formData.append('files', file, file.name);
+            });
+            note.createNote(formData);
+        });
+    },
+    createNote: function (data) {
         $.ajax({
             type: "POST",
             url: "/create-note",
-            data: formData,
+            data: data,
+            processData: false,
+            contentType: false,
             success: function (res) {
                 if (res.success) {
                     // Close modal and refresh list
@@ -385,18 +422,9 @@ var note = {
                 }
             },
             error: function () {
-                note.showCreateErrors(['เกิดปัญหาขัดข้อง.']);
+                note.showCreateErrors(['An error occurred while saving.']);
             }
         });
-    },
-    showCreateErrors: function (errors) {
-        var errorHtml = '<ul class="mb-0">';
-        errors.forEach(function (error) {
-            errorHtml += '<li>' + error + '</li>';
-        });
-        errorHtml += '</ul>';
-
-        $('#createErrors').html(errorHtml).show();
     },
     onPageChange(currentPage, rowsPerPage, offset) {
         listObj.page = currentPage;
@@ -410,10 +438,79 @@ var note = {
             listObj.page = 1;
             note.getNoteList(true);
         });
-    }
-    //Edit Button
-    //< a href = "/edit/${n.noteId}" class="btn btn-outline-primary btn-sm me-1" title = "Edit" >
-    //  <i class="bi bi-pencil"></i>
-    //</a >
+    },
+    //Dropzone script from PTAR
+    initDropzone: function () {
+        Dropzone.autoDiscover = false;
 
+        // เคลียร์ Dropzone ก่อน
+        if (Dropzone.instances.length > 0) {
+            Dropzone.instances.forEach(checkDropzone => checkDropzone.destroy());
+        }
+
+        checkDropzone = new Dropzone("#previewDropzone", {
+            url: "/create-note",
+            autoProcessQueue: false,
+            acceptedFiles: "image/*,video/*",
+            addRemoveLinks: true,
+            dictRemoveFile: "",
+            clickable: true,
+            init: function () {
+                const dzInstance = this;
+                const inputEl = document.getElementById("cameraInput");
+                const dt = new DataTransfer(); // สำหรับจำลองไฟล์ input
+
+                // เมื่อเลือกไฟล์จาก input ของเราเอง
+                inputEl.addEventListener("change", function () {
+                    for (let i = 0; i < inputEl.files.length; i++) {
+                        const file = inputEl.files[i];
+                        dzInstance.addFile(file);     // เพิ่มไฟล์ลง Dropzone
+                        dt.items.add(file);          // เก็บไฟล์ลง DataTransfer
+                    }
+                    inputEl.files = dt.files;         // อัปเดต input
+                });
+             
+
+                // เมื่อ Dropzone เพิ่มไฟล์
+                dzInstance.on("addedfile", function (file) {
+                    const preview = file.previewElement.querySelector(".dz-image");
+                    if (!preview) return;
+
+                    // ถ้าเป็น video แทน preview รูป
+                    if (file.type.startsWith("video/")) {
+                        const video = document.createElement("video");
+                        video.controls = true;
+                        video.src = URL.createObjectURL(file);
+                        video.style.width = "140px";
+                        video.style.height = "140px";
+                        video.style.borderRadius = "8px";
+                        video.style.objectFit = "cover";
+
+                        preview.innerHTML = "";
+                        preview.appendChild(video);
+                    }
+
+                    // ปรับปุ่มลบ
+                    const removeLink = file.previewElement.querySelector(".dz-remove");
+                    if (removeLink) {
+                        removeLink.innerHTML = '<i class="fas fa-times"></i>';
+                        removeLink.title = "Remove file";
+                        removeLink.style.fontSize = "18px";
+                    }
+                });
+
+                // เมื่อ Dropzone ลบไฟล์
+                dzInstance.on("removedfile", function (file) {
+                    // ลบไฟล์จาก DataTransfer (input ของเรา)
+                    for (let i = 0; i < dt.items.length; i++) {
+                        if (dt.items[i].getAsFile() === file) {
+                            dt.items.remove(i);
+                            break;
+                        }
+                    }
+                    inputEl.files = dt.files; // อัปเดต input ให้ตรงกับ Dropzone
+                });
+            }
+        });
+    },
 }

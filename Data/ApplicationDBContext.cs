@@ -12,5 +12,19 @@ namespace NoteFeature_App.Data
 
         public DbSet<NoteModel> Notes { get; set; }
         public DbSet<UserModel> Users { get; set; }
+        public DbSet<NoteFile> NoteFiles { get; set; }
+
+        //relationship config
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Configure NoteFile relationship
+            modelBuilder.Entity<NoteFile>()
+                .HasOne(nf => nf.Note)
+                .WithMany(n => n.NoteFiles)
+                .HasForeignKey(nf => nf.NoteId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
     }
 }

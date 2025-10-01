@@ -79,3 +79,114 @@ textarea {
 .position-relative {
     position: relative;
 }
+
+/* DROPZONE P'Tar */
+/* Upload File in Modal */
+.dropzone {
+    border: 2px dashed #e4e6e8 !important;
+    background: #f9f9fb;
+    padding: 40px 20px;
+    text-align: center;
+    border-radius: 8px;
+}
+
+    .dropzone .dz-message {
+        font-size: 1.2rem;
+        color: #4b5563;
+    }
+
+        .dropzone .dz-message i {
+            display: block;
+            font-size: 36px;
+            color: #9ca3af;
+            margin-bottom: 12px;
+        }
+
+    .dropzone small {
+        color: #9ca3af;
+        font-size: 0.85rem;
+    }
+
+    /* กล่อง preview ให้แสดงเรียงแนวนอน และ scroll ได้ */
+    .dropzone .dz-previews {
+        display: flex !important;
+        flex-wrap: nowrap; /* ไม่ตัดบรรทัด */
+        overflow-x: auto;
+        gap: 12px;
+        margin-top: 20px;
+        padding-bottom: 10px;
+    }
+
+    .dropzone .dz-preview {
+        flex: 0 0 auto; /* ไม่ให้ยืด */
+        /*            display: flex !important;*/
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 140px;
+        height: 180px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.05);
+        padding: 10px;
+        position: relative;
+    }
+
+        .dropzone .dz-preview .dz-image {
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-radius: 8px;
+            background: #f1f1f1;
+        }
+
+            .dropzone .dz-preview .dz-image img,
+            .dropzone .dz-preview .dz-image video {
+                max-width: 100%;
+                max-height: 100%;
+                object-fit: cover;
+            }
+
+    .dropzone .dz-preview {
+        margin-top: 8px;
+        cursor: pointer;
+        color: #dc3545;
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+        display: block;
+    }
+
+    .dropzone .dz-remove {
+        margin-top: 8px;
+        cursor: pointer;
+        color: #dc3545;
+        font-size: 18px;
+        background: none;
+        border: none;
+        text-align: center;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .dropzone .dz-remove i {
+            pointer-events: none;
+        }
+
+    /* ซ่อนข้อมูลที่ไม่ต้องแสดง */
+    .dropzone .dz-details,
+    .dropzone .dz-progress,
+    .dropzone .dz-success-mark,
+    .dropzone .dz-error-mark {
+        display: none !important;
+    }
+
+    .dropzone .dz-preview img,
+    .dropzone .dz-preview video {
+        filter: none !important;
+        transition: none !important;
+    }

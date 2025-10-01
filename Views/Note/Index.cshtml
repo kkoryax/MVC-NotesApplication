@@ -1,6 +1,124 @@
 ﻿@{
     ViewData["Title"] = "Home";
 }
+<style>
+    /* DROPZONE P'Tar border color change from e4e6e8*/
+/* Upload File in Modal */
+.dropzone {
+    border: 2px dashed #c2c3c4 !important;
+    background: #f9f9fb;
+    padding: 40px 20px;
+    text-align: center;
+    border-radius: 8px;
+}
+
+    .dropzone .dz-message {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        text-align: center;
+    }
+
+        .dropzone .dz-message i {
+            display: block;
+            font-size: 36px;
+            color: #9ca3af;
+            margin-bottom: 12px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+    .dropzone small {
+        color: #9ca3af;
+        font-size: 0.85rem;
+    }
+
+    /* กล่อง preview ให้แสดงเรียงแนวนอน และ scroll ได้ */
+    .dropzone .dz-previews {
+        display: flex !important;
+        flex-wrap: nowrap; /* ไม่ตัดบรรทัด */
+        overflow-x: auto;
+        gap: 12px;
+        margin-top: 20px;
+        padding-bottom: 10px;
+    }
+
+    .dropzone .dz-preview {
+        flex: 0 0 auto; /* ไม่ให้ยืด */
+        /*            display: flex !important;*/
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 140px;
+        height: 180px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.05);
+        padding: 10px;
+        position: relative;
+    }
+
+        .dropzone .dz-preview .dz-image {
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-radius: 8px;
+            background: #f1f1f1;
+        }
+
+            .dropzone .dz-preview .dz-image img,
+            .dropzone .dz-preview .dz-image video {
+                max-width: 100%;
+                max-height: 100%;
+                object-fit: cover;
+            }
+
+    .dropzone .dz-preview {
+        margin-top: 8px;
+        cursor: pointer;
+        color: #dc3545;
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+        display: block;
+    }
+
+    .dropzone .dz-remove {
+        margin-top: 8px;
+        cursor: pointer;
+        color: #dc3545;
+        font-size: 18px;
+        background: none;
+        border: none;
+        text-align: center;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .dropzone .dz-remove i {
+            pointer-events: none;
+        }
+
+    /* ซ่อนข้อมูลที่ไม่ต้องแสดง */
+    .dropzone .dz-details,
+    .dropzone .dz-progress,
+    .dropzone .dz-success-mark,
+    .dropzone .dz-error-mark {
+        display: none !important;
+    }
+
+    .dropzone .dz-preview img,
+    .dropzone .dz-preview video {
+        filter: none !important;
+        transition: none !important;
+    }
+</style>
 
 <main>
     <div class="d-flex justify-content-between align-items-center mb-4 user-select-none">
@@ -196,7 +314,7 @@
                 </div>
                 <div class="modal-body">
                     <!-- Create Mode Only -->
-                        <form id="editForm">
+                        <div id="editForm">
                             <input type="hidden" id="createNoteId" name="NoteId" />
 
                             <div class="mb-3">
@@ -213,11 +331,22 @@
                                 <textarea id="createNoteContent" name="NoteContent" class="form-control" style="height: 200px" required></textarea>
                             </div>
 
+                            <!-- Dropzone library for upload -->
+                            <label class="form-label required user-select-none">Upload Image</label>
                             <div class="mb-3">
-                                <label for="uploadFile"class="form-label user-select-none">
-                                    Upload files <span class="text-danger">*</span>
-                                </label>
-                                <input type="file" id="uploadFile" class="form-control"/>
+                                <input class="form-control mb-3"
+                                       id="cameraInput"
+                                       type="file"
+                                       style="cursor:pointer;"
+                                       multiple
+                                />
+                                <form class="dropzone" id="previewDropzone">
+                                    <div class="dz-message">
+                                            <i class="fas fa-upload"></i>
+                                        <div>Drop files here or click above input</div>
+                                        <small class="">(Selected files are not actually uploaded.)</small>
+                                    </div>
+                                </form>
                             </div>
 
                             <div class="mb-3 d-flex flex-row justify-content-between">
@@ -240,7 +369,7 @@
                             </div>
 
                             <div id="createErrors" class="mb-3 text-danger" style="display: none;"></div>
-                        </form>
+                        </div>
                     </div>
                 </div>
 
@@ -251,13 +380,20 @@
 
 @section Scripts {
 <!-- Script Pagination from P'TAR Project -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="~/js/pagination.js?ver=@DateTime.Now.Ticks.ToString()"></script>
 <script src="~/js/note.js?ver=@DateTime.Now.Ticks.ToString()"></script>
+
+<!-- sweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
 <!-- Include select 2 -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<!-- Dropzone CDN-->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"></script>
 
 <script type="text/javascript">
 
@@ -287,6 +423,9 @@
             });
 
         note.init();
+        note.initCreateNote();
+        note.initDropzone();
+        
     });
 
 </script>
