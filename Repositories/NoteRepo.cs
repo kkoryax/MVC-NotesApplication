@@ -54,6 +54,7 @@ namespace NoteFeature_App.Repositories
             return _db.Notes
                 .Include(n => n.CreatedByUser)
                 .Include(n => n.UpdatedByUser)
+                .Include(n => n.NoteFiles)
                 .Where(n => n.NoteId == noteId && n.FlagActive == true)
                 .ToList();
         }
@@ -212,6 +213,7 @@ namespace NoteFeature_App.Repositories
             var query = _db.Notes
                             .Include(n => n.CreatedByUser)
                             .Include(n => n.UpdatedByUser)
+                            .Include(n => n.NoteFiles)
                             .AsQueryable();
 
             query = query.Where(n => n.FlagActive == true);

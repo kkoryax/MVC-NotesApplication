@@ -324,12 +324,24 @@ namespace NoteFeature_App.Controllers.Note
                     createdByUserId = n.CreatedByUserId,
                     createdByUserEmail = n.CreatedByUser?.Email,
                     updatedAt = n.UpdatedAt.HasValue ? n.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm") : null,
+
+                    noteFiles = n.NoteFiles != null && n.NoteFiles.Any()
+                        ? n.NoteFiles.Select(nf => new
+                        {
+                            noteFileId = nf.NoteFileId,
+                            noteId = nf.NoteId,
+                            noteFilePath = nf.NoteFilePath,
+                            noteFileType = nf.NoteFileType,
+                            uploadedDate = nf.UploadedDate.ToString("yyyy-MM-dd HH:mm")
+                        }).ToList()
+                        : null,
+
                     updatedByUserId = n.UpdatedByUserId,
                     updatedByUserEmail = n.UpdatedByUser?.Email,
                     isAdmin = isAdmin,
                     isOwner = n.CreatedByUserId.ToString() == currentUserId,
                     canDelete = isAdmin || n.CreatedByUserId.ToString() == currentUserId,
-                    canSeeDeleteButton = isAdmin|| isUser
+                    canSeeDeleteButton = isAdmin|| isUser,
                 }).ToList();
 
                 return Json(new
