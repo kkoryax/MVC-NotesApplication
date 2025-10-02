@@ -238,6 +238,18 @@ namespace NoteFeature_App.Repositories
                 {
                     query = query.Where(n => n.UpdatedAt.HasValue);
                 }
+                if (statusFilter.Contains("Nonedit"))
+                {
+                    query = query.Where(n => !n.UpdatedAt.HasValue);
+                }
+                if (statusFilter.Contains("File"))
+                {
+                    query = query.Where(n => n.NoteFiles.Any());
+                }
+                if (statusFilter.Contains("Nonfile"))
+                {
+                    query = query.Where(n => !n.NoteFiles.Any());
+                }
                 if (statusFilter.Contains("Pinned"))
                 {
                     query = query.Where(n => n.IsPinned == true);

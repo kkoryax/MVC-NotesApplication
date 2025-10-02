@@ -76,7 +76,7 @@ var note = {
                                                 <i class="bi bi-sticky text-warning"></i>
                                                 ${n.noteTitle}
                                                 <small class="text-muted">
-                                                    ${n.updatedAt ? '<span class="badge bg-secondary">edit</span>' : ''}
+                                                    ${n.updatedAt !== null ? '<span class="badge bg-secondary">edit</span>' : ''}
                                                 </small>
                                             </h5>
                                             <p class="card-text user-select-none" style="overflow: text-truncated; line-height: 1.4; min-height: 4em;">${n.noteContent}</p>
@@ -199,8 +199,10 @@ var note = {
                         $('#editIsPinnedBox').hide();
                     }
 
-                    if (note.updatedAt) {
+                    if (note.updatedAt != null && note.updatedAt !== '') {
                         $('#modalUpdatedAt').text('Updated: ' + note.updatedAt).show();
+                    } else {
+                        $('#modalUpdatedAt').hide();
                     }
                     if (note.isPinned) {
                         $('#modalNotePinned').show();
