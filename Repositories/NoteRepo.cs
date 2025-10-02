@@ -82,7 +82,7 @@ namespace NoteFeature_App.Repositories
                 /* Add Note File data */
                 note.NoteFiles = new List<NoteFile>();
 
-                string? uploadsFolder = Path.Combine(_webHost.WebRootPath, "uploads"); 
+                string? uploadsFolder = Path.Combine(_webHost.ContentRootPath, "Upload"); 
 
                 if (!Directory.Exists(uploadsFolder))
                 {
@@ -95,10 +95,14 @@ namespace NoteFeature_App.Repositories
                     //loop create files
                     foreach (var file in files)
                     {
-                        if (file.Length > 0)
+                        if (file.Length > 0)    
                         {
                             string fileName = Guid.NewGuid().ToString();
-                            string filePath = Path.Combine(uploadsFolder, fileName);
+                            string fileExtension = Path.GetExtension(file.FileName);
+                            //get .jpg .png bla bla to save in path
+                            string fileNameWithExtension = fileName + fileExtension;
+
+                            string filePath = Path.Combine(uploadsFolder, fileNameWithExtension);
 
                             using (FileStream stream = new FileStream(filePath, FileMode.Create))
                             {
