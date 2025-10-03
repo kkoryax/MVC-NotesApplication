@@ -46,7 +46,7 @@ namespace NoteFeature_App.Migrations
 
                     b.HasIndex("NoteId");
 
-                    b.ToTable("NoteFiles");
+                    b.ToTable("NoteFiles", (string)null);
                 });
 
             modelBuilder.Entity("NoteFeature_App.Models.Note.NoteModel", b =>
@@ -89,7 +89,7 @@ namespace NoteFeature_App.Migrations
 
                     b.HasIndex("UpdatedByUserId");
 
-                    b.ToTable("Notes");
+                    b.ToTable("Notes", (string)null);
                 });
 
             modelBuilder.Entity("NoteFeature_App.Models.User.UserModel", b =>
@@ -120,7 +120,7 @@ namespace NoteFeature_App.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("NoteFeature_App.Models.Note.NoteFile", b =>
