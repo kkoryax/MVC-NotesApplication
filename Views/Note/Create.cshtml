@@ -7,7 +7,7 @@
 <main>
     <h1 class="user-select-none">Create Note</h1>
 
-    <form action="create" method="post">
+    <form action="create" method="post" enctype="multipart/form-data">
         <div class="mb-3">
             <label for="NoteTitle" class="form-label">
                 Title<span class="text-danger">*</span>
@@ -21,6 +21,12 @@
             </label>
             <textarea id="NoteContent" name="NoteContent" class="form-control" placeholder="กรุณาใส่เนื้อหาที่ต้องการของคุณ" style="height: 150px"></textarea>
             <span asp-validation-for="NoteContent" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label for="files" class="form-label">
+                Upload Files
+            </label>
+            <input class="form-control" id="files" name="files" type="file" multiple accept="image/*,video/*" />
         </div>
         <div class="mb-3">
             <label for="IsPinned">

@@ -101,7 +101,7 @@ namespace NoteFeature_App.Controllers.Note
         [Authorize(Roles = "User,Admin")]
         [Route("create")]
         [HttpPost]
-        public IActionResult Create(NoteModel note)
+        public async Task<IActionResult> Create(NoteModel note, List<IFormFile> files)
         {
             if (!ModelState.IsValid)
             {
@@ -116,7 +116,7 @@ namespace NoteFeature_App.Controllers.Note
             string? currentUserId = AuthHelper.GetCurrentUserId(HttpContext);
             note.CreatedByUserId = Guid.Parse(currentUserId);
 
-            _noteRepo.AddNote(note);
+            await _noteRepo.AddNote(note, files);
             return RedirectToAction("Index");
         } //Old action method page
 
@@ -187,32 +187,26 @@ namespace NoteFeature_App.Controllers.Note
         [Authorize(Roles = "User,Admin")]
         [Route("/create-note")]
         [HttpPost]
-        public JsonResult CreateNote(NoteModel note)
+        public async Task<JsonResult> CreateNote(NoteModel note, List<IFormFile> files)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
-                    var errors = ModelState.Values
-                        .SelectMany(e => e.Errors)
-                        .Select(e => e.ErrorMessage)
-                        .ToList();
+                var errors = ModelState.Values
+                    .SelectMany(e => e.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
 
-                    return Json(new { success = false, errors = errors });
-                }
-
-                string? currentUserId = AuthHelper.GetCurrentUserId(HttpContext);
-                note.CreatedByUserId = Guid.Parse(currentUserId);
-                note.CreatedAt = DateTime.Now;
-
-                _noteRepo.AddNote(note);
-
-                return Json(new { success = true });
+                return Json(new { success = false, errors = errors });
             }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, errors = new[] { InnerException(ex) } });
-            }
+
+            string? currentUserId = AuthHelper.GetCurrentUserId(HttpContext);
+            note.CreatedByUserId = Guid.Parse(currentUserId);
+            note.CreatedAt = DateTime.Now;
+            note.NoteId = Guid.NewGuid();
+
+            await _noteRepo.AddNote(note, files);
+
+            return Json(new { success = true });
         } //New method
 
         [Authorize(Roles = "User,Admin")]
@@ -330,12 +324,24 @@ namespace NoteFeature_App.Controllers.Note
                     createdByUserId = n.CreatedByUserId,
                     createdByUserEmail = n.CreatedByUser?.Email,
                     updatedAt = n.UpdatedAt.HasValue ? n.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm") : null,
+
+                    noteFiles = n.NoteFiles != null && n.NoteFiles.Any()
+                        ? n.NoteFiles.Select(nf => new
+                        {
+                            noteFileId = nf.NoteFileId,
+                            noteId = nf.NoteId,
+                            noteFilePath = nf.NoteFilePath,
+                            noteFileType = nf.NoteFileType,
+                            uploadedDate = nf.UploadedDate.ToString("yyyy-MM-dd HH:mm")
+                        }).ToList()
+                        : null,
+
                     updatedByUserId = n.UpdatedByUserId,
                     updatedByUserEmail = n.UpdatedByUser?.Email,
                     isAdmin = isAdmin,
                     isOwner = n.CreatedByUserId.ToString() == currentUserId,
                     canDelete = isAdmin || n.CreatedByUserId.ToString() == currentUserId,
-                    canSeeDeleteButton = isAdmin|| isUser
+                    canSeeDeleteButton = isAdmin|| isUser,
                 }).ToList();
 
                 return Json(new
