@@ -4,10 +4,11 @@ using NoteFeature_App.Helpers;
 using NoteFeature_App.Models.Note;
 using NoteFeature_App.Repositories;
 using System.Security.Claims;
+using NoteFeature.Controllers.Base;
 
 namespace NoteFeature_App.Controllers.Note
 {
-    public class NoteController : Controller
+    public class NoteController : BaseController
     {
         private readonly INoteRepo _noteRepo;
 
@@ -314,40 +315,18 @@ namespace NoteFeature_App.Controllers.Note
                 var isAdmin = User.IsInRole("Admin");
                 var isUser = User.IsInRole("User");
 
-                var notesDto = result.Notes.Select(n => new
-                {
-                    noteId = n.NoteId,
-                    noteTitle = n.NoteTitle,
-                    noteContent = n.NoteContent,
-                    isPinned = n.IsPinned == true,
-                    createdAt = n.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
-                    createdByUserId = n.CreatedByUserId,
-                    createdByUserEmail = n.CreatedByUser?.Email,
-                    updatedAt = n.UpdatedAt.HasValue ? n.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm") : null,
+                var notesList = result.Notes.ToList();
 
-                    noteFiles = n.NoteFiles != null && n.NoteFiles.Any()
-                        ? n.NoteFiles.Select(nf => new
-                        {
-                            noteFileId = nf.NoteFileId,
-                            noteId = nf.NoteId,
-                            noteFilePath = nf.NoteFilePath,
-                            noteFileType = nf.NoteFileType,
-                            uploadedDate = nf.UploadedDate.ToString("yyyy-MM-dd HH:mm")
-                        }).ToList()
-                        : null,
+                ViewBag.CurrentUserId = currentUserId;
+                ViewBag.IsAdmin = isAdmin;
+                ViewBag.IsUser = isUser;
 
-                    updatedByUserId = n.UpdatedByUserId,
-                    updatedByUserEmail = n.UpdatedByUser?.Email,
-                    isAdmin = isAdmin,
-                    isOwner = n.CreatedByUserId.ToString() == currentUserId,
-                    canDelete = isAdmin || n.CreatedByUserId.ToString() == currentUserId,
-                    canSeeDeleteButton = isAdmin|| isUser,
-                }).ToList();
+                var html = RenderRazorViewtoString(this, "Partial_NoteCard", notesList);
 
                 return Json(new
                 {
                     success = true,
-                    notes = notesDto,
+                    notes = html,
                     total = result.Total
                 });
             }

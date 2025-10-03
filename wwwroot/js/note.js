@@ -64,63 +64,7 @@ var note = {
                     if (res.success) {
                         const $container = $("#noteListContainer");
                         $container.empty();
-
-                        if (res.notes && res.notes.length > 0) {
-                            res.notes.forEach(n => {
-                                const card = `
-                                <div class="col-12 col-sm-6 col-md-6 col-xl-4"">
-                                    <div class="card shadow-sm border-2 note-card" style="height: 235px; width: auto;">
-                                        <div class="card-body d-flex flex-column p-4 flex-nowrap">
-                                            <h5 class="card-title mb-2 user-select-none text-truncate">
-                                             ${n.isPinned ? '<i class="bi bi-pin-angle-fill text-danger"></i>' : ''}
-                                                <i class="bi bi-sticky text-warning"></i>
-                                                ${n.noteTitle}
-                                                <small class="text-muted">
-                                                    ${n.updatedAt !== null ? '<span class="badge bg-secondary">edit</span>' : ''}
-                                                </small>
-                                            </h5>
-                                            <p class="card-text user-select-none" style="overflow: text-truncated; line-height: 1.4; min-height: 4em;">${n.noteContent}</p>
-                                            <div class="mt-auto">
-                                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                                                    <div class="d-flex flex-column">
-                                                        <small class="text-muted user-select-none text-truncate">
-                                                            <i class="bi bi-calendar3"></i> ${n.createdAt}
-                                                        </small>
-                                                        <small class="text-muted user-select-none text-truncate">
-                                                            <i class="bi bi-person"></i> ${n.createdByUserEmail}
-                                                        </small>
-                                                        <small class="text-muted">
-                                                            ${n.noteFiles && n.noteFiles.length > 0 ?
-                                                                `<i class="bi bi-paperclip"></i><small>${n.noteFiles.length} file attachment</small>`
-                                                                : ''
-                                                            }
-                                                        </small>
-                                                    </div>
-                                                    <div class="d-flex gap-1">
-                                                        <button type="button" class="btn btn-outline-primary btn-sm detail-btn"
-                                                                data-bs-toggle="modal" data-bs-target="#noteDetailModal"
-                                                                data-note-id="${n.noteId}" title="View Detail">
-                                                            <i class="bi bi-eye"></i>
-                                                        </button>
-                                                        ${n.canSeeDeleteButton ? `
-                                                         <button type="button" class="btn btn-outline-danger btn-sm delete-btn"
-                                                                data-note-id="${n.noteId}" data-note-title="${n.noteTitle}" data-can-delete="${n.canDelete}" title="Delete">
-                                                            <i class="bi bi-trash"></i>
-                                                        </button>
-                                                        ` : ''}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>`;
-                                $container.append(card);
-                            });
-                            
-                            // Delete button event listener is handled in setupDeleteSA()
-                        } else {
-                            $container.append('<div class="col-12"><p class="text-center">No notes available.</p></div>');
-                        }
+                        $container.html(res.notes);
 
                         listObj.total = res.total || 0;
                         pagination.totalItems = listObj.total;

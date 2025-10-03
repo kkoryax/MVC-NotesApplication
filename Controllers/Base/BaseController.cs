@@ -9,12 +9,9 @@ namespace NoteFeature.Controllers.Base
     public class BaseController : Controller
     {
         protected string? BaseUrl = null;
-        private readonly INoteRepo _noteRepo;
 
-        public BaseController(INoteRepo noteRepo,
-            IHttpContextAccessor httpContextAccessor)
+        public BaseController()
         {
-            _noteRepo = noteRepo;
         }
 
         protected string RenderRazorViewtoString(Controller controller, string viewName, object model = null)
