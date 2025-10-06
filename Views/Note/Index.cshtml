@@ -1,4 +1,6 @@
-﻿@{
+﻿@using NoteFeature_App.Models.Note
+
+@{
     ViewData["Title"] = "Home";
 }
 <style>
@@ -158,6 +160,10 @@
         <div id="noteListContainer" class="row g-4">
           <!-- Data fetch -->
         </div>
+        
+        <div id="noteModalContainer">
+            <!-- Data fetch -->
+        </div>
 
             <!-- Pagination template from P'TAR project -->
         <div class="">
@@ -178,7 +184,6 @@
                 </div>
             </div>
         </div>
-
     
     <!-- Advance Filter Modal-->
     <div class="modal fade" id="advanceFilterModal" tabindex="-1" aria-labelledby="advanceFilterModalLabel" aria-hidden="true">
@@ -229,100 +234,7 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Note Edit Modal -->
-    <div class="modal fade" id="noteDetailModal" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title user-select-none">
-                        <i class="bi bi-sticky text-warning me-2"></i>
-                        <span id="modalNoteTitle">Edit Note</span>
-                        <span id="modalNotePinned" class="ms-2" style="display: none;">
-                            <i class="bi bi-pin-angle-fill text-danger"></i>
-                        </span>
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Edit Mode Only -->
-                    <div id="editMode">
-                        <div class="mb-3">
-                            <small class="text-muted">
-                                <i class="bi bi-calendar3 me-1"></i>
-                                <span id="modalCreatedAt"></span>
-                                <span id="modalUpdatedAt" class="ms-3" style="display: none;"></span>
-                                <br>
-                                <i class="bi bi-person me-1"></i>
-                                <span id="modalCreatedBy"></span>
-                            </small>
-                        </div>
-                        <form id="editForm">
-                            <input type="hidden" id="editNoteId" name="NoteId" />
-
-                            <div class="mb-3">
-                                <label for="editNoteTitle" class="form-label user-select-none">
-                                    Title <span class="text-danger">*</span>
-                                </label>
-                                <input class="form-control" id="editNoteTitle" name="NoteTitle" type="text" required />
-                            </div>
-
-                            <!-- Mock Up Image -->
-                            <div class="mb-3">
-                                <label class="form-label user-select-none">
-                                    Image
-                                    <span class="text-danger">*</span>
-                                </label>
-                                <div class="">
-                                    <div class="row flex-row flex-nowrap justify-content-start">
-                                        <div class="col-5 me-1">
-                                           <img src="https://placehold.co/600x400" style="height: 200px; width: auto;">
-                                        </div>
-                                        <div class="col-5 me-1">
-                                           <img src="https://placehold.co/600x400" style="height: 200px; width: auto;">
-                                        </div>
-                                    </div>
-                                 </div>
-                            </div>
-
-
-                            <div class="mb-3">
-                                <label for="editNoteContent" class="form-label user-select-none">
-                                    Content <span class="text-danger">*</span>
-                                </label>
-                                <textarea id="editNoteContent" name="NoteContent" class="form-control" style="height: fit-content"required></textarea>
-                            </div>
-
-                            <div class="mb-3">
-                                <div class="form-check" id="editIsPinnedBox">
-                                    <input type="checkbox" id="editIsPinned" name="IsPinned" value="true" class="form-check-input" />
-                                    <label for="editIsPinned" class="form-check-label">
-                                        Pin this note
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div id="editErrors" class="mb-3 text-danger" style="display: none;"></div>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <!-- Edit Mode Buttons -->
-                    <div id="editButtons">
-                        <button type="button" class="btn btn-secondary me-2" id="cancelEditBtn">
-                            @* <i class="bi bi-x-circle me-1"></i>Cancel *@
-                            Cancel
-                        </button>
-                        <button type="button" class="btn btn-success" id="saveEditBtn">
-                            Save
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    </div> 
 
     <!-- Create Modal -->
     <div class="modal fade" id="createModal" tabindex="-1">
@@ -398,6 +310,7 @@
                
             </div>
         </div>
+       
 </main>
 
 @section Scripts {
@@ -407,7 +320,6 @@
 
 <!-- sweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 
 <!-- Include select 2 -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -446,8 +358,7 @@
 
         note.init();
         note.initCreateNote();
-        note.initDropzone();
-        
+        note.initDropzone();   
     });
 
 </script>

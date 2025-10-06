@@ -34,6 +34,18 @@ namespace NoteFeature.Controllers.Base
                 return sw.GetStringBuilder().ToString();
             }
         }
+
+        [Microsoft.AspNetCore.Mvc.NonAction]
+        public override void OnActionExecuting(Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext context)
+        {
+            var url = $"{context.HttpContext.Request.Scheme}://{context.HttpContext.Request.Host}{context.HttpContext.Request.PathBase}";
+            url = url.EndsWith("/") ? url : string.Concat(url, "/");
+            BaseUrl = url;
+            ViewBag.baseUrl = BaseUrl;
+
+            //viewbag user 
+            //ViewBag.RoleID = _userProfile?.RoleID;
+        }
     }
 }
 

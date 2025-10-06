@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NoteFeature.Controllers.Base;
 using NoteFeature_App.Helpers;
+using NoteFeature_App.Models.DTO;
 using NoteFeature_App.Models.Note;
 using NoteFeature_App.Repositories;
+using System.Collections.Generic;
 using System.Security.Claims;
-using NoteFeature.Controllers.Base;
 
 namespace NoteFeature_App.Controllers.Note
 {
@@ -66,28 +68,21 @@ namespace NoteFeature_App.Controllers.Note
             }
             var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var isAdmin = User.IsInRole("Admin");
-            var isOwner = note.CreatedByUserId.ToString() == currentUserId;
+            var isUser = User.IsInRole("User");
+            var isOwner = note.CreatedByUserId.ToString() == currentUserId; 
+            var canEdit = isAdmin || isOwner;
 
-            var noteDto = new
-            {
-                noteId = note.NoteId,
-                noteTitle = note.NoteTitle,
-                noteContent = note.NoteContent,
-                isPinned = note.IsPinned == true,
-                createdAt = note.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
-                createdByUserId = note.CreatedByUserId,
-                createdByUserEmail = note.CreatedByUser?.Email,
-                updatedAt = note.UpdatedAt.HasValue ? note.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm") : null,
-                updatedByUserId = note.UpdatedByUserId,
-                updatedByUserEmail = note.UpdatedByUser?.Email,
-                isAdmin = isAdmin,
-                isOwner = isOwner,
-                canEdit = isAdmin || isOwner
-            };
+            ViewBag.CurrentUserId = currentUserId;
+            ViewBag.IsAdmin = isAdmin;
+            ViewBag.IsUser = isUser;
+
+            var html = RenderRazorViewtoString(this, "Partial_NoteEdit", note);
+
             return Json(new
             {
                 success = true,
-                note = noteDto
+                html,
+                canEdit
             }); 
         }
 

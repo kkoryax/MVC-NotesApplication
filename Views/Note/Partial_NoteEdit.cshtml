@@ -1,0 +1,103 @@
+﻿@model NoteFeature_App.Models.Note.NoteModel
+
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+    <!-- Note Edit Modal -->
+    <div class="modal fade" id="noteDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title user-select-none">
+                        <i class="bi bi-sticky text-warning me-2"></i>
+                        <span>@Model.NoteTitle</span>
+                        <span class="ms-2" style="display: none;">
+                            @if (Model.IsPinned == true)
+                            {
+                               <i class="bi bi-pin-angle-fill text-danger"></i>
+                            }
+                        </span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Edit Mode Only -->
+                    <div id="editMode">
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                <i class="bi bi-calendar3 me-1"></i>
+                                <span>@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</span>
+                                <span class="ms-3" style="display: none;">@Model.UpdatedAt?.ToString("yyyy-MM-dd HH:mm")</span>
+                                <br>
+                                <i class="bi bi-person me-1"></i>
+                                <span>@Model.CreatedByUser?.Email</span>
+                            </small>
+                        </div>
+                        <form id="editForm">
+                            <input type="hidden" id="editNoteId" name="NoteId" />
+
+                            <div class="mb-3">
+                                <label for="editNoteTitle" class="form-label user-select-none">
+                                    Title <span class="text-danger">*</span>
+                                </label>
+                                <input class="form-control" id="editNoteTitle" name="NoteTitle" type="text" value="@Model.NoteTitle" required />
+                            </div>
+
+                        <!-- Mock Up Image -->
+                        <div class="mb-3">
+                            @if (Model.NoteFiles != null && Model.NoteFiles.Any())
+                             {
+                                <label class="form-label user-select-none">
+                                    Image
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <div class="">
+                                    <div class="col-12 d-flex overflow-auto gap-2" style="white-space: nowrap;">
+                                        @foreach (var file in Model.NoteFiles)
+                                        {
+                                            <div class="flex-shrink-0">
+                                                <img src="@file.NoteFilePath" style="height: 200px; width: auto;">
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                            <div class="mb-3">
+                                <label for="editNoteContent" class="form-label user-select-none">
+                                    Content <span class="text-danger">*</span>
+                                </label>
+                                <textarea id="editNoteContent" name="NoteContent" class="form-control" style="height: fit-content" required>@Model.NoteContent</textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check" id="editIsPinnedBox">
+                                    <input type="checkbox" id="editIsPinned" name="IsPinned" value="true" class="form-check-input" />
+                                    <label for="editIsPinned" class="form-check-label">
+                                        Pin this note
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="editErrors" class="mb-3 text-danger" style="display: none;"></div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <!-- Edit Mode Buttons -->
+                    <div id="editButtons">
+                        <button type="button" class="btn btn-secondary me-2" id="cancelEditBtn">
+                            Cancel
+                        </button>
+                        <button type="button" class="btn btn-success" id="saveEditBtn">
+                            Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

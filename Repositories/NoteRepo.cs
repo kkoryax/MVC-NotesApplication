@@ -26,13 +26,19 @@ namespace NoteFeature_App.Repositories
         #region DBSetting
         private readonly ApplicationDBContext _db;
         private readonly IWebHostEnvironment _webHost;
+        private readonly IHostEnvironment _hosting;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         //DB Constructor
-        public NoteRepo(ApplicationDBContext db
-                , IWebHostEnvironment webHost)
+        public NoteRepo(ApplicationDBContext db,
+                    IWebHostEnvironment webHost,
+                    IHostEnvironment hosting,
+                    IHttpContextAccessor httpContextAccessor)
         {
             _db = db;
             _webHost = webHost;
+            _hosting = hosting;
+            _httpContextAccessor = httpContextAccessor;
         }
         #endregion
 
@@ -83,6 +89,11 @@ namespace NoteFeature_App.Repositories
                 /* Add Note File data */
                 note.NoteFiles = new List<NoteFile>();
 
+                var request = _httpContextAccessor.HttpContext?.Request;
+                string savePath = $"{request?.Scheme}://{request?.Host}{request?.PathBase}";
+                string uploadPath = _hosting.ContentRootPath;
+                string folderName = "Upload";
+
                 string? uploadsFolder = Path.Combine(_webHost.ContentRootPath, "Upload"); 
 
                 if (!Directory.Exists(uploadsFolder))
@@ -102,10 +113,12 @@ namespace NoteFeature_App.Repositories
                             string fileExtension = Path.GetExtension(file.FileName);
                             //get .jpg .png bla bla to save in path
                             string fileNameWithExtension = fileName + fileExtension;
+                            string fullSavePath = Path.Combine(savePath, folderName, fileNameWithExtension);
 
-                            string filePath = Path.Combine(uploadsFolder, fileNameWithExtension);
+                            string physicalFilePath = Path.Combine(uploadsFolder, fileNameWithExtension);
+                            string urlPath = $"{savePath.TrimEnd('/')}/{folderName}/{fileNameWithExtension}";
 
-                            using (FileStream stream = new FileStream(filePath, FileMode.Create))
+                            using (FileStream stream = new FileStream(physicalFilePath, FileMode.Create))
                             {
                                 await file.CopyToAsync(stream);
                             }
@@ -114,7 +127,7 @@ namespace NoteFeature_App.Repositories
                             {
                                 NoteFileId = Guid.NewGuid(),
                                 NoteId = note.NoteId,
-                                NoteFilePath = filePath,
+                                NoteFilePath = urlPath,
                                 NoteFileType = file.ContentType,
                                 UploadedDate = DateTime.Now
                             });

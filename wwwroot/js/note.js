@@ -7,12 +7,11 @@
 
 const pagination = createPagination();  //Declare pagination object
 let checkDropzone; // Declare 
+var myModalAdd //Declare Global variable
 
 var note = {
     init: () => {
         pagination.init("pagination", "paginationPerPageSelect", listObj.total, listObj.perPage, listObj.page, note.onPageChange)
-        note.setupDetailModal();
-        note.setupEditMode();
         note.setupCreateModal();
         note.setupDeleteSA();
         note.applyAdvanceFilter();
@@ -66,6 +65,13 @@ var note = {
                         $container.empty();
                         $container.html(res.notes);
 
+                        //Bind button for open modal
+                        $(document).off('click', '.detail-btn').on('click', '.detail-btn', function () {
+                            var noteId = $(this).data('note-id');
+                            console.log(noteId);
+                            note.getModalNoteDetail(noteId);
+                        });
+
                         listObj.total = res.total || 0;
                         pagination.totalItems = listObj.total;
                         pagination.currentPage = listObj.page;
@@ -83,22 +89,39 @@ var note = {
                 }
             });
     },
-    setupDetailModal: function () {
-        var detailModal = document.getElementById('noteDetailModal');
+    getModalNoteDetail: function (noteId) {
+        $.ajax({
+            url: "note-details/" + noteId,
+            type: 'GET',
+            success: function (res) {
+                if (!res) {
+                    console.error("No response from server");
+                    return;
+                }
+                if (res.success) {
+                    console.log(res)
+                    $('#noteModalContainer').empty().html(res.html);
 
-        if (detailModal) {
-            detailModal.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget;
-                var noteId = button.getAttribute('data-note-id');
+                    myModalAdd = new bootstrap.Modal(document.getElementById('noteDetailModal'));
+                    myModalAdd.show();
 
-                note.loadNoteDetail(noteId);
-            });
-
-            // Reset modal when hidden
-            detailModal.addEventListener('hidden.bs.modal', function () {
-                note.resetModal();
-            });
-        }
+                    if (res.canEdit) {
+                        $('#editForm :input').prop('disabled', false);
+                        $('#editIsPinnedBox').show();
+                        $('#saveEditBtn').show();
+                    } else {
+                        $('#editForm :input').prop('disabled', true);
+                        $('#editIsPinnedBox').hide();
+                        $('#saveEditBtn').hide();
+                    }
+                } else {
+                    app.notify("error", res.message);
+                }
+            },
+            error: function () {
+                window.location.reload();
+            }
+        });
     },
     resetModal: function () {
         // Clear form and errors; keep edit mode as the only mode
@@ -111,72 +134,6 @@ var note = {
         $('#editForm :input').prop('disabled', false);
         $('#saveEditBtn').show();
     },
-    loadNoteDetail: function (noteId) {
-        $.ajax({
-            type: "GET",
-            url: "/note-details/" + noteId,
-            success: function (res) {
-                if (res.success) {
-                    var note = res.note;
-
-                    // Header info
-                    $('#modalNoteTitle').text(note.noteTitle);
-                    $('#modalCreatedAt').text('Created: ' + note.createdAt);
-                    $('#modalCreatedBy').text('Created by ' + note.createdByUserEmail);
-
-                    // Populate edit form directly
-                    $('#editNoteId').val(note.noteId);
-                    $('#editNoteTitle').val(note.noteTitle);
-                    $('#editNoteContent').val(note.noteContent);
-                    $('#editIsPinned').prop('checked', !!note.isPinned);
-
-                    // Permissions: disable form and hide Save when cannot edit
-                    if (note.canEdit) {
-                        $('#editForm :input').prop('disabled', false);
-                        $('#saveEditBtn').show();
-                        //$('#cancelEditBtn').show();
-                        $('#editIsPinnedBox').show();
-                    } else {
-                        $('#editForm :input').prop('disabled', true);
-                        $('#saveEditBtn').hide();
-                        //$('#cancelEditBtn').hide();
-                        $('#editIsPinnedBox').hide();
-                    }
-
-                    if (note.updatedAt != null && note.updatedAt !== '') {
-                        $('#modalUpdatedAt').text('Updated: ' + note.updatedAt).show();
-                    } else {
-                        $('#modalUpdatedAt').hide();
-                    }
-                    if (note.isPinned) {
-                        $('#modalNotePinned').show();
-                    } else {
-                        $('#modalNotePinned').hide();
-                    }
-       
-                } else {
-                    console.error('Failed to load note detail:', res.message);
-                }
-            },
-            error: function () {
-                console.error('Error loading note detail');
-            }
-        });
-    },
-    setupEditMode: function () {
-        $('#cancelEditBtn').on('click', function () {
-            var modalEl = document.getElementById('noteDetailModal');
-            if (modalEl) {
-                var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-                modal.hide();
-            }
-        });
-
-        $('#saveEditBtn').on('click', function () {
-            note.saveNote();
-        });
-    },
-
     saveNote: function () {
         var formData = {
             NoteId: $('#editNoteId').val(),
@@ -192,15 +149,10 @@ var note = {
             success: function (res) {
                 if (res.success) {
                     // Close modal and refresh list
-                    var modalEl = document.getElementById('noteDetailModal');
-                    if (modalEl) {
-                        var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-                        modal.hide();
-                    }
-                    note.getNoteList(false);
+                    myModalAdd = new bootstrap.Modal(document.getElementById('noteDetailModal'));
+                    myModalAdd.hide();
 
-                    // Show success message (optional)
-                    //note.showNotification('success', 'Note updated successfully!');
+                    note.getNoteList(false);
                 } else {
                     note.showEditErrors(res.errors);
                 }
@@ -210,7 +162,6 @@ var note = {
             }
         });
     },
-
     showEditErrors: function (errors) {
         var errorHtml = '<ul class="mb-0">';
         errors.forEach(function (error) {
@@ -220,7 +171,6 @@ var note = {
 
         $('#editErrors').html(errorHtml).show();
     },
-
     showCreateErrors: function (errors) {
         var errorHtml = '<ul class="mb-0">';
         errors.forEach(function (error) {
@@ -230,7 +180,7 @@ var note = {
 
         $('#createErrors').html(errorHtml).show();
     },
-     setupDeleteSA: function () {
+    setupDeleteSA: function () {
          // Add click event listener for delete buttons
          $(document).on('click', '.delete-btn', function(e) {
              e.preventDefault();

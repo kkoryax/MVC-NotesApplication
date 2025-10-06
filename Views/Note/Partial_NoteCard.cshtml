@@ -41,9 +41,8 @@
                         </div>
                         <div class="d-flex gap-1">
                             <button type="button" class="btn btn-outline-primary btn-sm detail-btn"
-                                    data-bs-toggle="modal" data-bs-target="#noteDetailModal"
-                                    data-note-id="@note.NoteId" title="View Detail">
-                                <i class="bi bi-eye"></i>
+                                    data-note-id="@note.NoteId" data-note-title="@note.NoteTitle">
+                                <i class="bi bi-eye"></i> 
                             </button>
                             @{
                                 var currentUserId = ViewBag.CurrentUserId?.ToString();
