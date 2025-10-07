@@ -68,7 +68,6 @@ var note = {
                         //Bind button for open modal
                         $(document).off('click', '.detail-btn').on('click', '.detail-btn', function () {
                             var noteId = $(this).data('note-id');
-                            console.log(noteId);
                             note.getModalNoteDetail(noteId);
                         });
 
@@ -99,16 +98,26 @@ var note = {
                     return;
                 }
                 if (res.success) {
-                    console.log(res)
                     $('#noteModalContainer').empty().html(res.html);
 
                     myModalAdd = new bootstrap.Modal(document.getElementById('noteDetailModal'));
                     myModalAdd.show();
 
+                    // Bind fancybox for images in the modal
+                    if (typeof Fancybox !== 'undefined') {
+                        Fancybox.bind('[data-fancybox]', {
+                        });
+                    }
+
                     if (res.canEdit) {
                         $('#editForm :input').prop('disabled', false);
                         $('#editIsPinnedBox').show();
+                        
                         $('#saveEditBtn').show();
+                        $('#saveEditBtn').off('click').on('click', function () {
+                            note.saveNote(noteId);
+                        });
+
                     } else {
                         $('#editForm :input').prop('disabled', true);
                         $('#editIsPinnedBox').hide();
@@ -124,7 +133,6 @@ var note = {
         });
     },
     resetModal: function () {
-        // Clear form and errors; keep edit mode as the only mode
         $('#editErrors').hide().empty();
         $('#editNoteId').val('');
         $('#editNoteTitle').val('');
@@ -134,9 +142,9 @@ var note = {
         $('#editForm :input').prop('disabled', false);
         $('#saveEditBtn').show();
     },
-    saveNote: function () {
+    saveNote: function (noteId) {
         var formData = {
-            NoteId: $('#editNoteId').val(),
+            NoteId: noteId,
             NoteTitle: $('#editNoteTitle').val(),
             NoteContent: $('#editNoteContent').val(),
             IsPinned: $('#editIsPinned').is(':checked')
@@ -149,7 +157,6 @@ var note = {
             success: function (res) {
                 if (res.success) {
                     // Close modal and refresh list
-                    myModalAdd = new bootstrap.Modal(document.getElementById('noteDetailModal'));
                     myModalAdd.hide();
 
                     note.getNoteList(false);
@@ -353,7 +360,7 @@ var note = {
         checkDropzone = new Dropzone("#previewDropzone", {
             url: "/create-note",
             autoProcessQueue: false,
-            acceptedFiles: "image/*,video/*",
+            acceptedFiles: "image/*,video/*,application/pdf",
             addRemoveLinks: true,
             dictRemoveFile: "",
             clickable: true,
