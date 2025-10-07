@@ -53,13 +53,13 @@
                                     var isAdmin = ViewBag.IsAdmin;
                                     var isUser = ViewBag.IsUser;
                                     var isOwner = note.CreatedByUserId.ToString() == currentUserId;
-                                    var canDelete = isAdmin || isOwner;
+                                    bool canDelete = isAdmin || isOwner;
                                     var canSeeDeleteButton = isAdmin || isUser;
                                 }
                                 @if (canSeeDeleteButton)
                                 {
                                     <button type="button" class="btn btn-outline-danger btn-sm delete-btn"
-                                            data-note-id="@note.NoteId" data-note-title="@note.NoteTitle" data-can-delete="@canDelete" title="Delete">
+                                            data-note-id="@note.NoteId" data-note-title="@note.NoteTitle" data-can-delete="@canDelete.ToString().ToLower()" title="Delete">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 }
