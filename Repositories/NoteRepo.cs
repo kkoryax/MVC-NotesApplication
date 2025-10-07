@@ -109,6 +109,7 @@ namespace NoteFeature_App.Repositories
                     {
                         if (file.Length > 0)    
                         {
+                            string rawFileName = Path.GetFileNameWithoutExtension(file.FileName);
                             string fileName = Guid.NewGuid().ToString();
                             string fileExtension = Path.GetExtension(file.FileName);
                             //get .jpg .png bla bla to save in path
@@ -127,6 +128,7 @@ namespace NoteFeature_App.Repositories
                             {
                                 NoteFileId = Guid.NewGuid(),
                                 NoteId = note.NoteId,
+                                NoteFileName = rawFileName + fileExtension,
                                 NoteFilePath = urlPath,
                                 NoteFileType = file.ContentType,
                                 UploadedDate = DateTime.Now

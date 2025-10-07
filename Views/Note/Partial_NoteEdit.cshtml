@@ -73,7 +73,7 @@
                                     var groupImages = "group-image";
                                     int index = 1;
 
-                                    var previewImage = Model.NoteFiles.FirstOrDefault();
+                                    var previewImage = imageFiles.FirstOrDefault();
                                     if (previewImage != null)
                                     {
                                         <div class="d-flex justify-content-center">
@@ -81,11 +81,11 @@
                                                 <a href="@previewImage.NoteFilePath" data-fancybox="@groupImages" data-caption="ภาพที่ @index">
                                                     <img src="@previewImage.NoteFilePath" style="height: 200px; width: auto; border-radius: 8px; cursor: pointer;" alt="ภาพที่ @index" />
                                                 </a>
-                                                @if (Model.NoteFiles.Count() > 1)
+                                                @if (imageFiles.Count() > 1)
                                                 {
                                                     <div class="position-absolute top-0 end-0 bg-dark text-white px-2 py-1 rounded" style="font-size: 12px; margin: 8px;">
                                                         <span class="user-select-none">
-                                                            +@(Model.NoteFiles.Count() - 1)
+                                                            +@(imageFiles.Count() - 1)
                                                         </span>
                                                     </div>
                                                 }
@@ -94,7 +94,7 @@
                                         index++;
 
                                         <div style="display: none;">
-                                            @foreach (var file in Model.NoteFiles.Skip(1))
+                                            @foreach (var file in imageFiles.Skip(1))
                                             {
                                                 <a data-fancybox="@groupImages" data-src="@file.NoteFilePath" data-caption="ภาพที่ @index"></a>
                                                 index++;
@@ -113,27 +113,18 @@
                                     var groupPdf = "group-pdf";
                                     int index = 1;
 
-                                    var previewPdf = Model.NoteFiles.FirstOrDefault();
-                                    if (previewPdf != null)
-                                    {
-                                        <div class="d-flex justify-content-start">
-                                            <div class="position-relative">
-                                                <a href="@previewPdf.NoteFilePath" data-fancybox="@groupPdf" data-caption="ไฟล์ที่ @index">
-                                                   PDF
-                                                </a>
-                                            </div>
-                                        </div>
-                                        index++;
-
-                                        <div style="display: none;">
-                                            @foreach (var file in Model.NoteFiles.Skip(1))
+                                    <div class="d-flex justify-content-start">
+                                        <div class="position-relative">
+                                            @foreach (var file in pdfFiles)
                                             {
-                                                <a data-fancybox="@groupPdf" data-src="@file.NoteFilePath" data-caption="ไฟล์ที่ @index"></a>
+                                                <a href="@file.NoteFilePath" data-fancybox="@groupPdf" data-caption="ไฟล์ที่ @index">
+                                                    @file.NoteFileName
+                                                </a>
+                                                <br />
                                                 index++;
                                             }
                                         </div>
-                                    }
-
+                                    </div>
                                 }
                             }
                         </div>
