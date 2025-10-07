@@ -6,6 +6,7 @@ using NoteFeature_App.Models.DTO;
 using NoteFeature_App.Models.Note;
 using NoteFeature_App.Repositories;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Security.Claims;
 
 namespace NoteFeature_App.Controllers.Note
@@ -24,6 +25,31 @@ namespace NoteFeature_App.Controllers.Note
         public IActionResult Index()
         {
             return View();
+        }
+
+        [Authorize(Roles = "User,Admin")]
+        [Route("/get-add-note-modal")]
+        [HttpGet]
+        public JsonResult GetAddNoteModal()
+        {
+            try
+            {
+                var html = RenderRazorViewtoString(this, "Partial_NoteCreate", null);
+                
+                return Json(new
+                {
+                    success = true,
+                    html
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = InnerException(ex)
+                });
+            }
         }
 
         [Authorize]
@@ -340,6 +366,5 @@ namespace NoteFeature_App.Controllers.Note
             return (ex.InnerException != null) ? InnerException(ex.InnerException) : ex.Message;
         }
 
-       
     }
 }

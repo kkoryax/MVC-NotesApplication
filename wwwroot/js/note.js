@@ -7,12 +7,11 @@
 
 const pagination = createPagination();  //Declare pagination object
 let checkDropzone; // Declare 
-var myModalAdd //Declare Global variable
+var myModalAdd; //Declare Global variable
 
 var note = {
     init: () => {
         pagination.init("pagination", "paginationPerPageSelect", listObj.total, listObj.perPage, listObj.page, note.onPageChange)
-        note.setupCreateModal();
         note.setupDeleteSA();
         note.applyAdvanceFilter();
         note.getNoteList(true);
@@ -35,6 +34,10 @@ var note = {
         $("#filterDateTo").on("change", function () {
             listObj.page = 1;
             note.getNoteList(true);
+        });
+
+        $("#openAddNoteModal").on("click", function () {
+            note.getModalAddNote();
         });
     },
     getNoteList: function (isRender = false) {
@@ -112,7 +115,7 @@ var note = {
                     if (res.canEdit) {
                         $('#editForm :input').prop('disabled', false);
                         $('#editIsPinnedBox').show();
-                        
+
                         $('#saveEditBtn').show();
                         $('#saveEditBtn').off('click').on('click', function () {
                             note.saveNote(noteId);
@@ -129,6 +132,34 @@ var note = {
             },
             error: function () {
                 window.location.reload();
+            }
+        });
+    },
+    getModalAddNote: function () {
+        $.ajax({
+            url: "/get-add-note-modal",
+            type: 'GET',
+            success: function (res) {
+                if (!res) {
+                    console.error("No response from server");
+                    return;
+                }
+                if (res.success) {
+                    $('#addNoteContainer').empty().html(res.html);
+                    
+                    note.resetCreateModal();
+
+                    myModalAdd = new bootstrap.Modal(document.getElementById('addNoteModal'));
+                    myModalAdd.show();
+
+                    note.initCreateNote();
+                    note.initDropzone();
+                } else {
+                    app.notify("error", res.message);
+                }
+            },
+            error: function () {
+                app.notify("error", "ไม่สามารถโหลด modal ได้");
             }
         });
     },
@@ -188,123 +219,110 @@ var note = {
         $('#createErrors').html(errorHtml).show();
     },
     setupDeleteSA: function () {
-         // Add click event listener for delete buttons
-         $(document).on('click', '.delete-btn', function(e) {
-             e.preventDefault();
-             
-             var noteId = $(this).data('note-id');
-             var noteTitle = $(this).data('note-title');
-             var canDelete = $(this).data('can-delete');
-             
-             if (!canDelete) {
-                 Swal.fire({
-                     title: "Notification",
-                     text: `คุณไม่มีสิทธิ์ในการลบ "${noteTitle}"`,
-                     icon: "error",
-                     confirmButtonText: "ตกลง"
-                 });
-                 return;
-             }
-             
-             const swalWithBootstrapButtons = Swal.mixin({
-                 customClass: {
-                     confirmButton: "btn btn-danger ms-2",
-                     cancelButton: "btn btn-secondary me-2"
-                 },
-                 buttonsStyling: false
-             });
-             
-             swalWithBootstrapButtons.fire({
-                 title: "Notification",
-                 text: `คุณแน่ใจหรือไม่ที่จะลบ "${noteTitle}"?`,
-                 icon: "warning",
-                 showCancelButton: true,
-                 confirmButtonText: "ตกลง",
-                 cancelButtonText: "ยกเลิก",
-                 reverseButtons: true
-             }).then((result) => {
-                 if (result.isConfirmed) {
-                     // Send delete request
-                     $.ajax({
-                         type: "POST",
-                         url: "/delete/" + noteId,
-                         success: function(res) {
-                             swalWithBootstrapButtons.fire({
-                                 title: "Notification",
-                                 text: `"${noteTitle}" ถูกลบเรียบร้อยแล้ว`,
-                                 icon: "success"
-                             });
-                             // Refresh the note list
-                             note.getNoteList(false);
-                         },
-                         error: function() {
-                             swalWithBootstrapButtons.fire({
-                                 title: "Notification",
-                                 text: `ไม่สามารถลบ ${noteTitle} ได้`,
-                                 icon: "error"
-                             });
-                         }
-                     });
-                 }
-             });
-         });
-     },
-    setupCreateModal: function () {
-        var createModal = document.getElementById('createModal');
+        // Add click event listener for delete buttons
+        $(document).on('click', '.delete-btn', function (e) {
+            e.preventDefault();
 
-        if (createModal) {
-            createModal.addEventListener('hidden.bs.modal', function () {
-                note.resetCreateModal();
-            });
-        }
+            var noteId = $(this).data('note-id');
+            var noteTitle = $(this).data('note-title');
+            var canDelete = $(this).data('can-delete');
 
-        $('#cancelCreateBtn').on('click', function () {
-            var modalEl = document.getElementById('createModal');
-            if (modalEl) {
-                var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-                modal.hide();
+            if (!canDelete) {
+                Swal.fire({
+                    title: "Notification",
+                    text: `คุณไม่มีสิทธิ์ในการลบ "${noteTitle}"`,
+                    icon: "error",
+                    confirmButtonText: "ตกลง"
+                });
+                return;
             }
-        });
 
-        $('#saveCreateBtn').on('click', function () {
-            note.createNote();
+            const swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: "btn btn-danger ms-2",
+                    cancelButton: "btn btn-secondary me-2"
+                },
+                buttonsStyling: false
+            });
+
+            swalWithBootstrapButtons.fire({
+                title: "Notification",
+                text: `คุณแน่ใจหรือไม่ที่จะลบ "${noteTitle}"?`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "ตกลง",
+                cancelButtonText: "ยกเลิก",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Send delete request
+                    $.ajax({
+                        type: "POST",
+                        url: "/delete/" + noteId,
+                        success: function (res) {
+                            swalWithBootstrapButtons.fire({
+                                title: "Notification",
+                                text: `"${noteTitle}" ถูกลบเรียบร้อยแล้ว`,
+                                icon: "success"
+                            });
+                            // Refresh the note list
+                            note.getNoteList(false);
+                        },
+                        error: function () {
+                            swalWithBootstrapButtons.fire({
+                                title: "Notification",
+                                text: `ไม่สามารถลบ ${noteTitle} ได้`,
+                                icon: "error"
+                            });
+                        }
+                    });
+                }
+            });
         });
     },
     resetCreateModal: function () {
-        // Clear form and errors
         $('#createErrors').hide().empty();
         $('#createNoteTitle').val('');
         $('#createNoteContent').val('');
         $('#createIsPinned').prop('checked', false);
-        
-        // Clear file
+
+        // Clear file input
         var fileInput = document.getElementById('cameraInput');
         if (fileInput) {
             fileInput.value = '';
         }
-        
+
         if (typeof Dropzone !== 'undefined' && Dropzone.instances.length > 0) {
-            Dropzone.instances.forEach(function(dz) {
+            Dropzone.instances.forEach(function (dz) {
                 if (dz.element.id === 'previewDropzone') {
                     dz.removeAllFiles(true);
+                    dz.destroy();
                 }
             });
         }
+
+        $('#saveCreateBtn').off('click');
+        $('#cancelCreateBtn').off('click');
     },
     initCreateNote: function () {
-        $('#saveCreateBtn').unbind('click').on('click', function () {
+        $('#saveCreateBtn').off('click').on('click', function () {
             const files = checkDropzone.getAcceptedFiles();
 
             const formData = new FormData();
             formData.append('NoteTitle', $('#createNoteTitle').val());
             formData.append('NoteContent', $('#createNoteContent').val());
             formData.append('IsPinned', $('#createIsPinned').is(':checked'));
-            console.log(files.length)
             // Get files from dropzone
             files.forEach((file, index) => {
                 formData.append('files', file, file.name);
             });
             note.createNote(formData);
+        });
+
+        $('#cancelCreateBtn').off('click').on('click', function () {
+            if (myModalAdd) {
+                myModalAdd.hide();
+            }
         });
     },
     createNote: function (data) {
@@ -317,13 +335,11 @@ var note = {
             success: function (res) {
                 if (res.success) {
                     // Close modal and refresh list
-                    var modalEl = document.getElementById('createModal');
-                    if (modalEl) {
-                        var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-                        modal.hide();
+                    if (myModalAdd) {
+                        myModalAdd.hide();
                     }
                     note.getNoteList(false);
-                    
+
                     // Show success message (optional)
                     //note.showNotification('success', 'Note created successfully!');
                 } else {
@@ -352,9 +368,13 @@ var note = {
     initDropzone: function () {
         Dropzone.autoDiscover = false;
 
-        // เคลียร์ Dropzone ก่อน
+        // เคลียร์ Dropzone ก่อน - ทำลายเฉพาะ instance ที่เกี่ยวข้องกับ previewDropzone
         if (Dropzone.instances.length > 0) {
-            Dropzone.instances.forEach(checkDropzone => checkDropzone.destroy());
+            Dropzone.instances.forEach(function (dz) {
+                if (dz.element.id === 'previewDropzone') {
+                    dz.destroy();
+                }
+            });
         }
 
         checkDropzone = new Dropzone("#previewDropzone", {
@@ -378,7 +398,7 @@ var note = {
                     }
                     inputEl.files = dt.files;         // อัปเดต input
                 });
-             
+
 
                 // เมื่อ Dropzone เพิ่มไฟล์
                 dzInstance.on("addedfile", function (file) {
@@ -411,7 +431,8 @@ var note = {
                 // เมื่อ Dropzone ลบไฟล์
                 dzInstance.on("removedfile", function (file) {
                     // ลบไฟล์จาก DataTransfer (input ของเรา)
-                    for (let i = 0; i < dt.items.length; i++) {
+                    for (let i = 0; i < dt.items.length; i++)
+                    {
                         if (dt.items[i].getAsFile() === file) {
                             dt.items.remove(i);
                             break;
@@ -421,5 +442,5 @@ var note = {
                 });
             }
         });
-    },
+    }
 }
