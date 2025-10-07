@@ -9,12 +9,9 @@ namespace NoteFeature.Controllers.Base
     public class BaseController : Controller
     {
         protected string? BaseUrl = null;
-        private readonly INoteRepo _noteRepo;
 
-        public BaseController(INoteRepo noteRepo,
-            IHttpContextAccessor httpContextAccessor)
+        public BaseController()
         {
-            _noteRepo = noteRepo;
         }
 
         protected string RenderRazorViewtoString(Controller controller, string viewName, object model = null)
@@ -36,6 +33,18 @@ namespace NoteFeature.Controllers.Base
                 viewEngineResult.View.RenderAsync(viewContext);
                 return sw.GetStringBuilder().ToString();
             }
+        }
+
+        [Microsoft.AspNetCore.Mvc.NonAction]
+        public override void OnActionExecuting(Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext context)
+        {
+            var url = $"{context.HttpContext.Request.Scheme}://{context.HttpContext.Request.Host}{context.HttpContext.Request.PathBase}";
+            url = url.EndsWith("/") ? url : string.Concat(url, "/");
+            BaseUrl = url;
+            ViewBag.baseUrl = BaseUrl;
+
+            //viewbag user 
+            //ViewBag.RoleID = _userProfile?.RoleID;
         }
     }
 }

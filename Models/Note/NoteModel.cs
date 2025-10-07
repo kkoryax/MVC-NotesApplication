@@ -24,7 +24,7 @@ namespace NoteFeature_App.Models.Note
 
         public bool FlagActive { get; set; } = true;
 
-        public ICollection<NoteFile>? NoteFiles { get; set; } = new List<NoteFile>();
+        public List<NoteFile>? NoteFiles { get; set; } = new List<NoteFile>();
 
         // Foreign Keys to UserModel (simple auth)
         public Guid? CreatedByUserId { get; set; }

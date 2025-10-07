@@ -15,8 +15,16 @@
     
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- Fancybox CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@fancyapps/ui@6.0/dist/fancybox/fancybox.css" />
 </head>
 <body>
+    <!-- Base URL -->
+    <script>
+        let baseUrl = '@ViewBag.BaseUrl';
+    </script>
+
     <header>
         <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid d-flex align-items-center clearfix">
@@ -98,6 +106,7 @@
  <script src="~/lib/jquery/dist/jquery.min.js"></script>
  <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ <script src="https://cdn.jsdelivr.net/npm/@@fancyapps/ui@6.0/dist/fancybox/fancybox.umd.js"></script>
  @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -1,0 +1,171 @@
+﻿@model NoteFeature_App.Models.Note.NoteModel
+
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+    <!-- Note Edit Modal -->
+    <div class="modal fade" id="noteDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title user-select-none">
+                        <i class="bi bi-sticky text-warning me-2"></i>
+                        <span>@Model.NoteTitle</span>
+                        <span class="ms-2" style="display: none;">
+                            @if (Model.IsPinned == true)
+                            {
+                               <i class="bi bi-pin-angle-fill text-danger"></i>
+                            }
+                        </span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Edit Mode Only -->
+                    <div id="editMode">
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                <i class="bi bi-calendar3 me-1"></i>
+                                <span class="me-4">@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</span>
+                                @if (Model.UpdatedAt != null)
+                                {
+                                    <span>updated: @Model.UpdatedAt?.ToString("yyyy-MM-dd HH:mm")</span>
+                                }
+                                <br>
+
+                                <i class="bi bi-person me-1"></i>
+                                <span>@Model.CreatedByUser?.Email</span>
+                            </small>
+                        </div>
+                        <form id="editForm">
+                            <input type="hidden" id="editNoteId" name="NoteId" />
+
+                            <div class="mb-3">
+                                <label for="editNoteTitle" class="form-label user-select-none">
+                                    Title <span class="text-danger">*</span>
+                                </label>
+                                <input class="form-control" id="editNoteTitle" name="NoteTitle" type="text" value="@Model.NoteTitle" required />
+                            </div>
+
+                        <!-- File Zone -->
+                        <div class="mb-3">
+                            @if (Model.NoteFiles != null && Model.NoteFiles.Any())
+                             {
+                                //check file ext
+                                var imageFiles = Model.NoteFiles.Where(
+                                f => f.NoteFileType?.ToLower() == "image/jpeg" || f.NoteFileType?.ToLower() == "image/png"
+                                ).ToList();
+
+                                var pdfFiles = Model.NoteFiles.Where(
+                                f => f.NoteFileType?.ToLower() == "application/pdf"
+                                ).ToList();
+
+                                //image
+                                @if (imageFiles.Any())
+                                {
+                                    <label class="form-label user-select-none">
+                                        Image
+                                        <span class="text-danger">*</span>
+                                    </label>
+
+                                    var groupImages = "group-image";
+                                    int index = 1;
+
+                                    var previewImage = imageFiles.FirstOrDefault();
+                                    if (previewImage != null)
+                                    {
+                                        <div class="d-flex justify-content-center">
+                                            <div class="position-relative">
+                                                <a href="@previewImage.NoteFilePath" data-fancybox="@groupImages" data-caption="ภาพที่ @index">
+                                                    <img src="@previewImage.NoteFilePath" style="height: 200px; width: auto; border-radius: 8px; cursor: pointer;" alt="ภาพที่ @index" />
+                                                </a>
+                                                @if (imageFiles.Count() > 1)
+                                                {
+                                                    <div class="position-absolute top-0 end-0 bg-dark text-white px-2 py-1 rounded" style="font-size: 12px; margin: 8px;">
+                                                        <span class="user-select-none">
+                                                            +@(imageFiles.Count() - 1)
+                                                        </span>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                        index++;
+
+                                        <div style="display: none;">
+                                            @foreach (var file in imageFiles.Skip(1))
+                                            {
+                                                <a data-fancybox="@groupImages" data-src="@file.NoteFilePath" data-caption="ภาพที่ @index"></a>
+                                                index++;
+                                            }
+                                        </div>
+                                    }
+                                }
+
+                                @if (pdfFiles.Any())
+                                {
+                                    <label class="form-label user-select-none">
+                                        PDF
+                                        <span class="text-danger">*</span>
+                                    </label>
+
+                                    var groupPdf = "group-pdf";
+                                    int index = 1;
+
+                                    <div class="d-flex justify-content-start">
+                                        <div class="position-relative">
+                                            @foreach (var file in pdfFiles)
+                                            {
+                                                <a href="@file.NoteFilePath" data-fancybox="@groupPdf" data-caption="ไฟล์ที่ @index">
+                                                    @file.NoteFileName
+                                                </a>
+                                                <br />
+                                                index++;
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+
+                            <div class="mb-3">
+                                <label for="editNoteContent" class="form-label user-select-none">
+                                    Content <span class="text-danger">*</span>
+                                </label>
+                                <textarea id="editNoteContent" name="NoteContent" class="form-control" style="height: fit-content" required>@Model.NoteContent</textarea>
+                            </div>
+
+                        <div class="mb-3">
+                            <div class="form-check" id="editIsPinnedBox">
+                                <input type="checkbox"
+                                       id="editIsPinned"
+                                       name="IsPinned"
+                                       value="true"
+                                       class="form-check-input"
+                                       @(Model.IsPinned == true ? "checked" : "") />
+                                <label for="editIsPinned" class="form-check-label user-select-none">
+                                    Pin this note
+                                </label>
+                            </div>
+                        </div>
+
+                            <div id="editErrors" class="mb-3 text-danger" style="display: none;"></div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <!-- Edit Mode Buttons -->
+                    <div id="editButtons">
+                    <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+                        <button type="button" class="btn btn-success" id="saveEditBtn">
+                            Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

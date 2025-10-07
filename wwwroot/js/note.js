@@ -7,13 +7,11 @@
 
 const pagination = createPagination();  //Declare pagination object
 let checkDropzone; // Declare 
+var myModalAdd; //Declare Global variable
 
 var note = {
     init: () => {
         pagination.init("pagination", "paginationPerPageSelect", listObj.total, listObj.perPage, listObj.page, note.onPageChange)
-        note.setupDetailModal();
-        note.setupEditMode();
-        note.setupCreateModal();
         note.setupDeleteSA();
         note.applyAdvanceFilter();
         note.getNoteList(true);
@@ -36,6 +34,10 @@ var note = {
         $("#filterDateTo").on("change", function () {
             listObj.page = 1;
             note.getNoteList(true);
+        });
+
+        $("#openAddNoteModal").on("click", function () {
+            note.getModalAddNote();
         });
     },
     getNoteList: function (isRender = false) {
@@ -64,63 +66,13 @@ var note = {
                     if (res.success) {
                         const $container = $("#noteListContainer");
                         $container.empty();
+                        $container.html(res.notes);
 
-                        if (res.notes && res.notes.length > 0) {
-                            res.notes.forEach(n => {
-                                const card = `
-                                <div class="col-12 col-sm-6 col-md-6 col-xl-4"">
-                                    <div class="card shadow-sm border-2 note-card" style="height: 235px; width: auto;">
-                                        <div class="card-body d-flex flex-column p-4 flex-nowrap">
-                                            <h5 class="card-title mb-2 user-select-none text-truncate">
-                                             ${n.isPinned ? '<i class="bi bi-pin-angle-fill text-danger"></i>' : ''}
-                                                <i class="bi bi-sticky text-warning"></i>
-                                                ${n.noteTitle}
-                                                <small class="text-muted">
-                                                    ${n.updatedAt !== null ? '<span class="badge bg-secondary">edit</span>' : ''}
-                                                </small>
-                                            </h5>
-                                            <p class="card-text user-select-none" style="overflow: text-truncated; line-height: 1.4; min-height: 4em;">${n.noteContent}</p>
-                                            <div class="mt-auto">
-                                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                                                    <div class="d-flex flex-column">
-                                                        <small class="text-muted user-select-none text-truncate">
-                                                            <i class="bi bi-calendar3"></i> ${n.createdAt}
-                                                        </small>
-                                                        <small class="text-muted user-select-none text-truncate">
-                                                            <i class="bi bi-person"></i> ${n.createdByUserEmail}
-                                                        </small>
-                                                        <small class="text-muted">
-                                                            ${n.noteFiles && n.noteFiles.length > 0 ?
-                                                                `<i class="bi bi-paperclip"></i><small>${n.noteFiles.length} file attachment</small>`
-                                                                : ''
-                                                            }
-                                                        </small>
-                                                    </div>
-                                                    <div class="d-flex gap-1">
-                                                        <button type="button" class="btn btn-outline-primary btn-sm detail-btn"
-                                                                data-bs-toggle="modal" data-bs-target="#noteDetailModal"
-                                                                data-note-id="${n.noteId}" title="View Detail">
-                                                            <i class="bi bi-eye"></i>
-                                                        </button>
-                                                        ${n.canSeeDeleteButton ? `
-                                                         <button type="button" class="btn btn-outline-danger btn-sm delete-btn"
-                                                                data-note-id="${n.noteId}" data-note-title="${n.noteTitle}" data-can-delete="${n.canDelete}" title="Delete">
-                                                            <i class="bi bi-trash"></i>
-                                                        </button>
-                                                        ` : ''}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>`;
-                                $container.append(card);
-                            });
-                            
-                            // Delete button event listener is handled in setupDeleteSA()
-                        } else {
-                            $container.append('<div class="col-12"><p class="text-center">No notes available.</p></div>');
-                        }
+                        //Bind button for open modal
+                        $(document).off('click', '.detail-btn').on('click', '.detail-btn', function () {
+                            var noteId = $(this).data('note-id');
+                            note.getModalNoteDetail(noteId);
+                        });
 
                         listObj.total = res.total || 0;
                         pagination.totalItems = listObj.total;
@@ -139,25 +91,79 @@ var note = {
                 }
             });
     },
-    setupDetailModal: function () {
-        var detailModal = document.getElementById('noteDetailModal');
+    getModalNoteDetail: function (noteId) {
+        $.ajax({
+            url: "note-details/" + noteId,
+            type: 'GET',
+            success: function (res) {
+                if (!res) {
+                    console.error("No response from server");
+                    return;
+                }
+                if (res.success) {
+                    $('#noteModalContainer').empty().html(res.html);
 
-        if (detailModal) {
-            detailModal.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget;
-                var noteId = button.getAttribute('data-note-id');
+                    myModalAdd = new bootstrap.Modal(document.getElementById('noteDetailModal'));
+                    myModalAdd.show();
 
-                note.loadNoteDetail(noteId);
-            });
+                    // Bind fancybox for images in the modal
+                    if (typeof Fancybox !== 'undefined') {
+                        Fancybox.bind('[data-fancybox]', {
+                        });
+                    }
 
-            // Reset modal when hidden
-            detailModal.addEventListener('hidden.bs.modal', function () {
-                note.resetModal();
-            });
-        }
+                    if (res.canEdit) {
+                        $('#editForm :input').prop('disabled', false);
+                        $('#editIsPinnedBox').show();
+
+                        $('#saveEditBtn').show();
+                        $('#saveEditBtn').off('click').on('click', function () {
+                            note.saveNote(noteId);
+                        });
+
+                    } else {
+                        $('#editForm :input').prop('disabled', true);
+                        $('#editIsPinnedBox').hide();
+                        $('#saveEditBtn').hide();
+                    }
+                } else {
+                    app.notify("error", res.message);
+                }
+            },
+            error: function () {
+                window.location.reload();
+            }
+        });
+    },
+    getModalAddNote: function () {
+        $.ajax({
+            url: "/get-add-note-modal",
+            type: 'GET',
+            success: function (res) {
+                if (!res) {
+                    console.error("No response from server");
+                    return;
+                }
+                if (res.success) {
+                    $('#addNoteContainer').empty().html(res.html);
+                    
+                    note.resetCreateModal();
+
+                    myModalAdd = new bootstrap.Modal(document.getElementById('addNoteModal'));
+                    myModalAdd.show();
+
+                    note.initCreateNote();
+                    note.initDropzone();
+                } else {
+                    app.notify("error", res.message);
+                }
+            },
+            error: function () {
+                app.notify("error", "ไม่สามารถโหลด modal ได้");
+            }
+        });
     },
     resetModal: function () {
-        // Clear form and errors; keep edit mode as the only mode
         $('#editErrors').hide().empty();
         $('#editNoteId').val('');
         $('#editNoteTitle').val('');
@@ -167,75 +173,9 @@ var note = {
         $('#editForm :input').prop('disabled', false);
         $('#saveEditBtn').show();
     },
-    loadNoteDetail: function (noteId) {
-        $.ajax({
-            type: "GET",
-            url: "/note-details/" + noteId,
-            success: function (res) {
-                if (res.success) {
-                    var note = res.note;
-
-                    // Header info
-                    $('#modalNoteTitle').text(note.noteTitle);
-                    $('#modalCreatedAt').text('Created: ' + note.createdAt);
-                    $('#modalCreatedBy').text('Created by ' + note.createdByUserEmail);
-
-                    // Populate edit form directly
-                    $('#editNoteId').val(note.noteId);
-                    $('#editNoteTitle').val(note.noteTitle);
-                    $('#editNoteContent').val(note.noteContent);
-                    $('#editIsPinned').prop('checked', !!note.isPinned);
-
-                    // Permissions: disable form and hide Save when cannot edit
-                    if (note.canEdit) {
-                        $('#editForm :input').prop('disabled', false);
-                        $('#saveEditBtn').show();
-                        //$('#cancelEditBtn').show();
-                        $('#editIsPinnedBox').show();
-                    } else {
-                        $('#editForm :input').prop('disabled', true);
-                        $('#saveEditBtn').hide();
-                        //$('#cancelEditBtn').hide();
-                        $('#editIsPinnedBox').hide();
-                    }
-
-                    if (note.updatedAt != null && note.updatedAt !== '') {
-                        $('#modalUpdatedAt').text('Updated: ' + note.updatedAt).show();
-                    } else {
-                        $('#modalUpdatedAt').hide();
-                    }
-                    if (note.isPinned) {
-                        $('#modalNotePinned').show();
-                    } else {
-                        $('#modalNotePinned').hide();
-                    }
-       
-                } else {
-                    console.error('Failed to load note detail:', res.message);
-                }
-            },
-            error: function () {
-                console.error('Error loading note detail');
-            }
-        });
-    },
-    setupEditMode: function () {
-        $('#cancelEditBtn').on('click', function () {
-            var modalEl = document.getElementById('noteDetailModal');
-            if (modalEl) {
-                var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-                modal.hide();
-            }
-        });
-
-        $('#saveEditBtn').on('click', function () {
-            note.saveNote();
-        });
-    },
-
-    saveNote: function () {
+    saveNote: function (noteId) {
         var formData = {
-            NoteId: $('#editNoteId').val(),
+            NoteId: noteId,
             NoteTitle: $('#editNoteTitle').val(),
             NoteContent: $('#editNoteContent').val(),
             IsPinned: $('#editIsPinned').is(':checked')
@@ -248,15 +188,9 @@ var note = {
             success: function (res) {
                 if (res.success) {
                     // Close modal and refresh list
-                    var modalEl = document.getElementById('noteDetailModal');
-                    if (modalEl) {
-                        var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-                        modal.hide();
-                    }
-                    note.getNoteList(false);
+                    myModalAdd.hide();
 
-                    // Show success message (optional)
-                    //note.showNotification('success', 'Note updated successfully!');
+                    note.getNoteList(false);
                 } else {
                     note.showEditErrors(res.errors);
                 }
@@ -266,7 +200,6 @@ var note = {
             }
         });
     },
-
     showEditErrors: function (errors) {
         var errorHtml = '<ul class="mb-0">';
         errors.forEach(function (error) {
@@ -276,7 +209,6 @@ var note = {
 
         $('#editErrors').html(errorHtml).show();
     },
-
     showCreateErrors: function (errors) {
         var errorHtml = '<ul class="mb-0">';
         errors.forEach(function (error) {
@@ -286,124 +218,111 @@ var note = {
 
         $('#createErrors').html(errorHtml).show();
     },
-     setupDeleteSA: function () {
-         // Add click event listener for delete buttons
-         $(document).on('click', '.delete-btn', function(e) {
-             e.preventDefault();
-             
-             var noteId = $(this).data('note-id');
-             var noteTitle = $(this).data('note-title');
-             var canDelete = $(this).data('can-delete');
-             
-             if (!canDelete) {
-                 Swal.fire({
-                     title: "Notification",
-                     text: `คุณไม่มีสิทธิ์ในการลบ "${noteTitle}"`,
-                     icon: "error",
-                     confirmButtonText: "ตกลง"
-                 });
-                 return;
-             }
-             
-             const swalWithBootstrapButtons = Swal.mixin({
-                 customClass: {
-                     confirmButton: "btn btn-danger ms-2",
-                     cancelButton: "btn btn-secondary me-2"
-                 },
-                 buttonsStyling: false
-             });
-             
-             swalWithBootstrapButtons.fire({
-                 title: "Notification",
-                 text: `คุณแน่ใจหรือไม่ที่จะลบ "${noteTitle}"?`,
-                 icon: "warning",
-                 showCancelButton: true,
-                 confirmButtonText: "ตกลง",
-                 cancelButtonText: "ยกเลิก",
-                 reverseButtons: true
-             }).then((result) => {
-                 if (result.isConfirmed) {
-                     // Send delete request
-                     $.ajax({
-                         type: "POST",
-                         url: "/delete/" + noteId,
-                         success: function(res) {
-                             swalWithBootstrapButtons.fire({
-                                 title: "Notification",
-                                 text: `"${noteTitle}" ถูกลบเรียบร้อยแล้ว`,
-                                 icon: "success"
-                             });
-                             // Refresh the note list
-                             note.getNoteList(false);
-                         },
-                         error: function() {
-                             swalWithBootstrapButtons.fire({
-                                 title: "Notification",
-                                 text: `ไม่สามารถลบ ${noteTitle} ได้`,
-                                 icon: "error"
-                             });
-                         }
-                     });
-                 }
-             });
-         });
-     },
-    setupCreateModal: function () {
-        var createModal = document.getElementById('createModal');
+    setupDeleteSA: function () {
+        // Add click event listener for delete buttons
+        $(document).on('click', '.delete-btn', function (e) {
+            e.preventDefault();
 
-        if (createModal) {
-            createModal.addEventListener('hidden.bs.modal', function () {
-                note.resetCreateModal();
-            });
-        }
+            var noteId = $(this).data('note-id');
+            var noteTitle = $(this).data('note-title');
+            var canDelete = $(this).data('can-delete');
 
-        $('#cancelCreateBtn').on('click', function () {
-            var modalEl = document.getElementById('createModal');
-            if (modalEl) {
-                var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-                modal.hide();
+            if (!canDelete) {
+                Swal.fire({
+                    title: "Notification",
+                    text: `คุณไม่มีสิทธิ์ในการลบ "${noteTitle}"`,
+                    icon: "error",
+                    confirmButtonText: "ตกลง"
+                });
+                return;
             }
-        });
 
-        $('#saveCreateBtn').on('click', function () {
-            note.createNote();
+            const swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: "btn btn-danger ms-2",
+                    cancelButton: "btn btn-secondary me-2"
+                },
+                buttonsStyling: false
+            });
+
+            swalWithBootstrapButtons.fire({
+                title: "Notification",
+                text: `คุณแน่ใจหรือไม่ที่จะลบ "${noteTitle}"?`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "ตกลง",
+                cancelButtonText: "ยกเลิก",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Send delete request
+                    $.ajax({
+                        type: "POST",
+                        url: "/delete/" + noteId,
+                        success: function (res) {
+                            swalWithBootstrapButtons.fire({
+                                title: "Notification",
+                                text: `"${noteTitle}" ถูกลบเรียบร้อยแล้ว`,
+                                icon: "success"
+                            });
+                            // Refresh the note list
+                            note.getNoteList(false);
+                        },
+                        error: function () {
+                            swalWithBootstrapButtons.fire({
+                                title: "Notification",
+                                text: `ไม่สามารถลบ ${noteTitle} ได้`,
+                                icon: "error"
+                            });
+                        }
+                    });
+                }
+            });
         });
     },
     resetCreateModal: function () {
-        // Clear form and errors
         $('#createErrors').hide().empty();
         $('#createNoteTitle').val('');
         $('#createNoteContent').val('');
         $('#createIsPinned').prop('checked', false);
-        
-        // Clear file
+
+        // Clear file input
         var fileInput = document.getElementById('cameraInput');
         if (fileInput) {
             fileInput.value = '';
         }
-        
+
         if (typeof Dropzone !== 'undefined' && Dropzone.instances.length > 0) {
-            Dropzone.instances.forEach(function(dz) {
+            Dropzone.instances.forEach(function (dz) {
                 if (dz.element.id === 'previewDropzone') {
                     dz.removeAllFiles(true);
+                    dz.destroy();
                 }
             });
         }
+
+        $('#saveCreateBtn').off('click');
+        $('#cancelCreateBtn').off('click');
     },
     initCreateNote: function () {
-        $('#saveCreateBtn').unbind('click').on('click', function () {
+        $('#saveCreateBtn').off('click').on('click', function () {
             const files = checkDropzone.getAcceptedFiles();
 
             const formData = new FormData();
             formData.append('NoteTitle', $('#createNoteTitle').val());
             formData.append('NoteContent', $('#createNoteContent').val());
             formData.append('IsPinned', $('#createIsPinned').is(':checked'));
-            console.log(files.length)
             // Get files from dropzone
             files.forEach((file, index) => {
                 formData.append('files', file, file.name);
             });
             note.createNote(formData);
+        });
+
+        $('#cancelCreateBtn').off('click').on('click', function () {
+            if (myModalAdd) {
+                myModalAdd.hide();
+            }
         });
     },
     createNote: function (data) {
@@ -416,13 +335,11 @@ var note = {
             success: function (res) {
                 if (res.success) {
                     // Close modal and refresh list
-                    var modalEl = document.getElementById('createModal');
-                    if (modalEl) {
-                        var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-                        modal.hide();
+                    if (myModalAdd) {
+                        myModalAdd.hide();
                     }
                     note.getNoteList(false);
-                    
+
                     // Show success message (optional)
                     //note.showNotification('success', 'Note created successfully!');
                 } else {
@@ -451,15 +368,19 @@ var note = {
     initDropzone: function () {
         Dropzone.autoDiscover = false;
 
-        // เคลียร์ Dropzone ก่อน
+        // เคลียร์ Dropzone ก่อน - ทำลายเฉพาะ instance ที่เกี่ยวข้องกับ previewDropzone
         if (Dropzone.instances.length > 0) {
-            Dropzone.instances.forEach(checkDropzone => checkDropzone.destroy());
+            Dropzone.instances.forEach(function (dz) {
+                if (dz.element.id === 'previewDropzone') {
+                    dz.destroy();
+                }
+            });
         }
 
         checkDropzone = new Dropzone("#previewDropzone", {
             url: "/create-note",
             autoProcessQueue: false,
-            acceptedFiles: "image/*,video/*",
+            acceptedFiles: "image/*,video/*,application/pdf",
             addRemoveLinks: true,
             dictRemoveFile: "",
             clickable: true,
@@ -477,7 +398,7 @@ var note = {
                     }
                     inputEl.files = dt.files;         // อัปเดต input
                 });
-             
+
 
                 // เมื่อ Dropzone เพิ่มไฟล์
                 dzInstance.on("addedfile", function (file) {
@@ -510,7 +431,8 @@ var note = {
                 // เมื่อ Dropzone ลบไฟล์
                 dzInstance.on("removedfile", function (file) {
                     // ลบไฟล์จาก DataTransfer (input ของเรา)
-                    for (let i = 0; i < dt.items.length; i++) {
+                    for (let i = 0; i < dt.items.length; i++)
+                    {
                         if (dt.items[i].getAsFile() === file) {
                             dt.items.remove(i);
                             break;
@@ -520,5 +442,5 @@ var note = {
                 });
             }
         });
-    },
+    }
 }

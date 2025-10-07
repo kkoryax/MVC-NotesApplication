@@ -1,13 +1,17 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NoteFeature.Controllers.Base;
 using NoteFeature_App.Helpers;
+using NoteFeature_App.Models.DTO;
 using NoteFeature_App.Models.Note;
 using NoteFeature_App.Repositories;
+using System.Collections.Generic;
+using System.Drawing;
 using System.Security.Claims;
 
 namespace NoteFeature_App.Controllers.Note
 {
-    public class NoteController : Controller
+    public class NoteController : BaseController
     {
         private readonly INoteRepo _noteRepo;
 
@@ -21,6 +25,31 @@ namespace NoteFeature_App.Controllers.Note
         public IActionResult Index()
         {
             return View();
+        }
+
+        [Authorize(Roles = "User,Admin")]
+        [Route("/get-add-note-modal")]
+        [HttpGet]
+        public JsonResult GetAddNoteModal()
+        {
+            try
+            {
+                var html = RenderRazorViewtoString(this, "Partial_NoteCreate", null);
+                
+                return Json(new
+                {
+                    success = true,
+                    html
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = InnerException(ex)
+                });
+            }
         }
 
         [Authorize]
@@ -65,28 +94,21 @@ namespace NoteFeature_App.Controllers.Note
             }
             var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var isAdmin = User.IsInRole("Admin");
-            var isOwner = note.CreatedByUserId.ToString() == currentUserId;
+            var isUser = User.IsInRole("User");
+            var isOwner = note.CreatedByUserId.ToString() == currentUserId; 
+            var canEdit = isAdmin || isOwner;
 
-            var noteDto = new
-            {
-                noteId = note.NoteId,
-                noteTitle = note.NoteTitle,
-                noteContent = note.NoteContent,
-                isPinned = note.IsPinned == true,
-                createdAt = note.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
-                createdByUserId = note.CreatedByUserId,
-                createdByUserEmail = note.CreatedByUser?.Email,
-                updatedAt = note.UpdatedAt.HasValue ? note.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm") : null,
-                updatedByUserId = note.UpdatedByUserId,
-                updatedByUserEmail = note.UpdatedByUser?.Email,
-                isAdmin = isAdmin,
-                isOwner = isOwner,
-                canEdit = isAdmin || isOwner
-            };
+            ViewBag.CurrentUserId = currentUserId;
+            ViewBag.IsAdmin = isAdmin;
+            ViewBag.IsUser = isUser;
+
+            var html = RenderRazorViewtoString(this, "Partial_NoteEdit", note);
+
             return Json(new
             {
                 success = true,
-                note = noteDto
+                html,
+                canEdit
             }); 
         }
 
@@ -314,40 +336,18 @@ namespace NoteFeature_App.Controllers.Note
                 var isAdmin = User.IsInRole("Admin");
                 var isUser = User.IsInRole("User");
 
-                var notesDto = result.Notes.Select(n => new
-                {
-                    noteId = n.NoteId,
-                    noteTitle = n.NoteTitle,
-                    noteContent = n.NoteContent,
-                    isPinned = n.IsPinned == true,
-                    createdAt = n.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
-                    createdByUserId = n.CreatedByUserId,
-                    createdByUserEmail = n.CreatedByUser?.Email,
-                    updatedAt = n.UpdatedAt.HasValue ? n.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm") : null,
+                var notesList = result.Notes.ToList();
 
-                    noteFiles = n.NoteFiles != null && n.NoteFiles.Any()
-                        ? n.NoteFiles.Select(nf => new
-                        {
-                            noteFileId = nf.NoteFileId,
-                            noteId = nf.NoteId,
-                            noteFilePath = nf.NoteFilePath,
-                            noteFileType = nf.NoteFileType,
-                            uploadedDate = nf.UploadedDate.ToString("yyyy-MM-dd HH:mm")
-                        }).ToList()
-                        : null,
+                ViewBag.CurrentUserId = currentUserId;
+                ViewBag.IsAdmin = isAdmin;
+                ViewBag.IsUser = isUser;
 
-                    updatedByUserId = n.UpdatedByUserId,
-                    updatedByUserEmail = n.UpdatedByUser?.Email,
-                    isAdmin = isAdmin,
-                    isOwner = n.CreatedByUserId.ToString() == currentUserId,
-                    canDelete = isAdmin || n.CreatedByUserId.ToString() == currentUserId,
-                    canSeeDeleteButton = isAdmin|| isUser,
-                }).ToList();
+                var html = RenderRazorViewtoString(this, "Partial_NoteCard", notesList);
 
                 return Json(new
                 {
                     success = true,
-                    notes = notesDto,
+                    notes = html,
                     total = result.Total
                 });
             }
@@ -366,6 +366,5 @@ namespace NoteFeature_App.Controllers.Note
             return (ex.InnerException != null) ? InnerException(ex.InnerException) : ex.Message;
         }
 
-       
     }
 }

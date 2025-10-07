@@ -1,0 +1,78 @@
+﻿
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+<!-- Create Modal -->
+<div class="modal fade" id="addNoteModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title user-select-none">
+                    Create Note
+                </h5>
+                <button type="button" class="btn-close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Create Mode Only -->
+                <div id="editForm">
+                    <input type="hidden" id="createNoteId" name="NoteId" />
+
+                    <div class="mb-3">
+                        <label for="createNoteTitle" class="form-label user-select-none">
+                            Title <span class="text-danger">*</span>
+                        </label>
+                        <input class="form-control" id="createNoteTitle" name="NoteTitle" type="text" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="createNoteContent" class="form-label user-select-none">
+                            Content <span class="text-danger">*</span>
+                        </label>
+                        <textarea id="createNoteContent" name="NoteContent" class="form-control" style="height: 200px" required></textarea>
+                    </div>
+
+                    <!-- Dropzone library for upload -->
+                    <label class="form-label required user-select-none">Upload Image</label>
+                    <div class="mb-3">
+                        <input class="form-control mb-3"
+                               id="cameraInput"
+                               type="file"
+                               style="cursor:pointer;"
+                               multiple />
+                        <form class="dropzone" id="previewDropzone">
+                            <div class="dz-message">
+                                <i class="fas fa-upload"></i>
+                                <div>Drop files here or click above input</div>
+                                <small class="">(Selected files are not actually uploaded.)</small>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="mb-3 d-flex flex-row justify-content-between">
+                        <div class="form-check" id="createIsPinnedBox">
+                            <input type="checkbox" id="createIsPinned" name="IsPinned" value="true" class="form-check-input user-select-none" />
+                            <label for="createIsPinned" class="form-check-label">
+                                Pin this note
+                            </label>
+                        </div>
+                        <!-- Create Mode Buttons -->
+                        <div id="createButtons">
+                            <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal" id="cancelCreateBtn">
+                                @* <i class="bi bi-x-circle me-1"></i>Cancel *@
+                                Cancel
+                            </button>
+                            <button type="button" class="btn btn-success" id="saveCreateBtn">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="createErrors" class="mb-3 text-danger" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>

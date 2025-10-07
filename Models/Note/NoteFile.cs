@@ -11,6 +11,9 @@ namespace NoteFeature_App.Models.Note
         public Guid NoteId { get; set; }
 
         [Required]
+        public string? NoteFileName { get; set; }
+
+        [Required]
         public string? NoteFilePath { get; set; }
 
         [Required]
