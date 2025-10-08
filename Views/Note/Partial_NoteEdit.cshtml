@@ -3,6 +3,16 @@
 @*
     For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 *@
+<style>
+    .cards {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+        .cards:hover {
+            box-shadow: 5px 6px 6px 2px #e9ecef;
+            transform: scale(1.1);
+        }
+</style>
 
     <!-- Note Edit Modal -->
     <div class="modal fade" id="noteDetailModal" tabindex="-1">
@@ -106,25 +116,36 @@
                                 @if (pdfFiles.Any())
                                 {
                                     <label class="form-label user-select-none">
-                                        PDF
+                                        File Attachment (.pdf)
                                         <span class="text-danger">*</span>
                                     </label>
 
                                     var groupPdf = "group-pdf";
                                     int index = 1;
 
-                                    <div class="d-flex justify-content-start">
-                                        <div class="position-relative">
-                                            @foreach (var file in pdfFiles)
-                                            {
-                                                <a href="@file.NoteFilePath" data-fancybox="@groupPdf" data-caption="ไฟล์ที่ @index">
-                                                    @file.NoteFileName
-                                                </a>
-                                                <br />
-                                                index++;
-                                            }
-                                        </div>
+                                    <div class="d-flex flex-wrap justify-content-start gap-3">
+                                        @foreach (var file in pdfFiles)
+                                        {
+                                            <a href="@file.NoteFilePath"
+                                               data-fancybox="@groupPdf"
+                                               data-caption="ไฟล์ที่ @index"
+                                               class="text-decoration-none">
+
+                                                <div class="border border-1 border-secondary p-3 rounded cards"
+                                                     style="height: 80px; width: auto;">
+                                                    <div class="text-truncate text-primary">
+                                                        @file.NoteFileName
+                                                    </div>
+                                                    <small class="text-muted">
+                                                        @FileSizeHelper.FormatFileSize(file.NoteFileSize)
+                                                    </small>
+                                                </div>
+                                            </a>
+                                            index++;
+                                        }
                                     </div>
+
+
                                 }
                             }
                         </div>

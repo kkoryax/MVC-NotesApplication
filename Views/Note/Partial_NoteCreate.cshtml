@@ -11,7 +11,7 @@
                 <h5 class="modal-title user-select-none">
                     Create Note
                 </h5>
-                <button type="button" class="btn-close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <!-- Create Mode Only -->
@@ -48,6 +48,18 @@
                             </div>
                         </form>
                     </div>
+
+                    <!-- Date setup for deal feature -->
+                    <di class="mb-3 d-flex gap-3">
+                        <div class="">
+                            <label>Public Start Date</label>
+                            <input type="datetime-local" class="form-control" />
+                        </div>
+                        <div class="">
+                            <label>Public End Date</label>
+                            <input type="datetime-local" class="form-control" />
+                        </div>  
+                    </di>
 
                     <div class="mb-3 d-flex flex-row justify-content-between">
                         <div class="form-check" id="createIsPinnedBox">

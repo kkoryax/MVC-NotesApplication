@@ -130,6 +130,7 @@ namespace NoteFeature_App.Repositories
                                 NoteId = note.NoteId,
                                 NoteFileName = rawFileName + fileExtension,
                                 NoteFilePath = urlPath,
+                                NoteFileSize = file.Length,
                                 NoteFileType = file.ContentType,
                                 UploadedDate = DateTime.Now
                             });
