@@ -280,6 +280,14 @@ namespace NoteFeature_App.Repositories
                 {
                     query = query.Where(n => n.IsPinned == false);
                 }
+                if (statusFilter.Contains("Timelimit"))
+                {
+                    query = query.Where(n => n.ActiveUntil != null && n.IsPublic == true);
+                }
+                if (statusFilter.Contains("Nonlimit"))
+                {
+                    query = query.Where(n => !n.ActiveUntil.HasValue);
+                }
             }
 
             // Order query
