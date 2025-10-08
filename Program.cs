@@ -3,6 +3,7 @@ using Microsoft.Extensions.FileProviders;
 using NoteFeature_App.Data;
 using NoteFeature_App.Middleware;
 using NoteFeature_App.Repositories;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +13,11 @@ builder.Services.AddDbContext<ApplicationDBContext>(
 );
 builder.Services.AddHostedService<UpdateNoteStatusService>();
 
-
+//Set time culture
+var cultureInfo = new CultureInfo("en-US");
+cultureInfo.DateTimeFormat.Calendar = new GregorianCalendar();
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 builder.Services.AddAuthorization();
 
