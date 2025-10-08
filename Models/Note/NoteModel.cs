@@ -24,6 +24,12 @@ namespace NoteFeature_App.Models.Note
 
         public bool FlagActive { get; set; } = true;
 
+        public bool IsPublic { get; set; }
+
+        public DateTime ActiveFrom {  get; set; }
+
+        public DateTime? ActiveUntil { get; set; }
+
         public List<NoteFile>? NoteFiles { get; set; } = new List<NoteFile>();
 
         // Foreign Keys to UserModel (simple auth)

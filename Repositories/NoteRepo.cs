@@ -86,7 +86,10 @@ namespace NoteFeature_App.Repositories
                 //Add default values
                 note.FlagActive = true;
 
-                /* Add Note File data */
+                //check is public now or not via helper
+                note.IsPublic = CaculateIsPublicHelper.CalculateIsPublic(note.ActiveFrom, note.ActiveUntil);
+
+                    /* Add Note File data */
                 note.NoteFiles = new List<NoteFile>();
 
                 var request = _httpContextAccessor.HttpContext?.Request;
@@ -166,7 +169,10 @@ namespace NoteFeature_App.Repositories
             note_find_by_id.NoteTitle = note.NoteTitle;
             note_find_by_id.NoteContent = note.NoteContent;
             note_find_by_id.UpdatedAt = DateTime.Now;
-            note_find_by_id.UpdatedByUserId = note.UpdatedByUserId;
+            note_find_by_id.UpdatedByUserId = note.UpdatedByUserId;   
+            note_find_by_id.ActiveFrom = note.ActiveFrom;
+            note_find_by_id.ActiveUntil = note.ActiveUntil;
+            note_find_by_id.IsPublic = CaculateIsPublicHelper.CalculateIsPublic(note.ActiveFrom, note.ActiveUntil);
 
             if (note.UpdatedByUserId.HasValue)
             {
@@ -232,7 +238,7 @@ namespace NoteFeature_App.Repositories
                             .Include(n => n.NoteFiles)
                             .AsQueryable();
 
-            query = query.Where(n => n.FlagActive == true);
+            query = query.Where(n => n.FlagActive == true && n.IsPublic == true);
 
             if (!string.IsNullOrEmpty(search))
             {

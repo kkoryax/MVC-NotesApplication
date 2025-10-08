@@ -311,7 +311,8 @@ var note = {
             const formData = new FormData();
             formData.append('NoteTitle', $('#createNoteTitle').val());
             formData.append('NoteContent', $('#createNoteContent').val());
-            formData.append('IsPinned', $('#createIsPinned').is(':checked'));
+            formData.append('ActiveFrom', $('#publishStartDate').val());
+            formData.append('ActiveUntil', $('#publishEndDate').val());
             // Get files from dropzone
             files.forEach((file, index) => {
                 formData.append('files', file, file.name);
