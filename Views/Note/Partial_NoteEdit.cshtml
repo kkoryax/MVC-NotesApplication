@@ -36,17 +36,30 @@
                     <!-- Edit Mode Only -->
                     <div id="editMode">
                         <div class="mb-3">
-                            <small class="text-muted">
-                                <i class="bi bi-calendar3 me-1"></i>
-                                <span class="me-4">@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</span>
+                            <small class="text-muted  user-select-none">
+                                @if (Model.ActiveFrom != Model.CreatedAt)
+                                {
+                                    <i class="bi bi-calendar3 me-1"></i>
+                                    <span class="me-4">created date: @Model.ActiveFrom.ToString("yyyy-MM-dd HH:mm")</span>
+                                } else
+                                {
+                                    <i class="bi bi-calendar3 me-1"></i>
+                                    <span class="me-4">created date: @Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</span>
+                                }
                                 @if (Model.UpdatedAt != null)
                                 {
-                                    <span>updated: @Model.UpdatedAt?.ToString("yyyy-MM-dd HH:mm")</span>
+                                    <i class="bi bi-pen me-1"></i>
+                                    <span class="me-4">latest updated: @Model.UpdatedAt?.ToString("yyyy-MM-dd HH:mm")</span>
                                 }
-                                <br>
-
+                                @if (Model.ActiveUntil.HasValue && Model.ActiveUntil != null)
+                                {
+                                    <br />
+                                    <i class="bi bi-stopwatch me-1"></i>
+                                    <span>active until: @Model.ActiveUntil?.ToString("yyyy-MM-dd HH:mm")</span>
+                                }
+                                <br />
                                 <i class="bi bi-person me-1"></i>
-                                <span>@Model.CreatedByUser?.Email</span>
+                                <span>created by: @Model.CreatedByUser?.Email</span>
                             </small>
                         </div>
                         <form id="editForm">

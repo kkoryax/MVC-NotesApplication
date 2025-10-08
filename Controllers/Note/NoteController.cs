@@ -270,7 +270,6 @@ namespace NoteFeature_App.Controllers.Note
                 existing.IsPinned = note.IsPinned;
                 existing.UpdatedAt = DateTime.Now;
                 existing.UpdatedByUserId = Guid.Parse(currentUserId);
-                existing.ActiveUntil = note.ActiveUntil;
                 existing.IsPublic = CaculateIsPublicHelper.CalculateIsPublic(note.ActiveFrom, note.ActiveUntil);
 
                 _noteRepo.UpdateNote(existing);

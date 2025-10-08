@@ -43,8 +43,8 @@
                         <form class="dropzone" id="previewDropzone">
                             <div class="dz-message">
                                 <i class="fas fa-upload"></i>
-                                <div>Drop files here or click above input</div>
-                                <small class="">(Selected files are not actually uploaded.)</small>
+                                <div class="user-select-none">Drop files here or click above input</div>
+                                <small class="user-select-none">(Selected files are not actually uploaded.)</small>
                             </div>
                         </form>
                     </div>
@@ -52,8 +52,8 @@
                     <!-- Date setup for deal feature -->
                     <di class="mb-3 d-flex gap-3">
                         <div class="">
-                            <label class="" for="publishStartDate">
-                                Publish Start Date <span class="text-danger">*</span>
+                            <label class="user-select-none" for="publishStartDate">
+                                Publish Start Date <span class="text-danger ">*</span>
                             </label>
                             <input id="publishStartDate" type="datetime-local" class="form-control"
                                     min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")"
@@ -62,15 +62,15 @@
                             />
                         </div>
                         <div class="">
-                            <label class="" for="publishEndDate">Publish End Date</label>
-                            <input id="publishEndDate" type="datetime-local" class="form-control"  />
+                            <label class="user-select-none" for="publishEndDate">Publish End Date</label>
+                            <input id="publishEndDate" type="datetime-local" class="form-control" />
                         </div>  
                     </di>
 
                     <div class="mb-3 d-flex flex-row justify-content-between">
                         <div class="form-check" id="createIsPinnedBox">
                             <input type="checkbox" id="createIsPinned" name="IsPinned" value="true" class="form-check-input user-select-none" />
-                            <label for="createIsPinned" class="form-check-label">
+                            <label for="createIsPinned" class="form-check-label user-select-none">
                                 Pin this note
                             </label>
                         </div>
