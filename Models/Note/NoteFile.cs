@@ -24,6 +24,8 @@ namespace NoteFeature_App.Models.Note
 
         public DateTime UploadedDate { get; set; }
 
+        public bool FlagActive { get; set; } = true;
+
         //Navigation property
         public NoteModel? Note { get; set; }
     }

@@ -61,7 +61,7 @@ namespace NoteFeature_App.Controllers.Note
                 return NotFound();
             }
 
-            var note = _noteRepo.GetNoteByID(noteId).FirstOrDefault();
+            var note = _noteRepo.GetNoteByID(noteId);
 
             ViewBag.CreatedByUserEmail = note.CreatedByUser?.Email;
             ViewBag.UpdatedByUserEmail = note.UpdatedByUser?.Email;
@@ -83,7 +83,7 @@ namespace NoteFeature_App.Controllers.Note
                     message = "Note ID is required."
                 });
             }
-            var note = _noteRepo.GetNoteByID(noteId).FirstOrDefault();
+            var note = _noteRepo.GetNoteByID(noteId);
             if (note == null)
             {
                 return Json(new
@@ -97,6 +97,7 @@ namespace NoteFeature_App.Controllers.Note
             var isUser = User.IsInRole("User");
             var isOwner = note.CreatedByUserId.ToString() == currentUserId; 
             var canEdit = isAdmin || isOwner;
+            var isPublic = note.IsPublic;
 
             ViewBag.CurrentUserId = currentUserId;
             ViewBag.IsAdmin = isAdmin;
@@ -108,7 +109,8 @@ namespace NoteFeature_App.Controllers.Note
             {
                 success = true,
                 html,
-                canEdit
+                canEdit,
+                isPublic
             }); 
         }
 
@@ -162,7 +164,7 @@ namespace NoteFeature_App.Controllers.Note
                 return View();
             }
 
-            NoteModel? note = _noteRepo.GetNoteByID(noteId).FirstOrDefault();
+            NoteModel? note = _noteRepo.GetNoteByID(noteId);
 
             var isAdmin = User.IsInRole("Admin");
             var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -186,7 +188,7 @@ namespace NoteFeature_App.Controllers.Note
                 return View();
             }
 
-            var existing = _noteRepo.GetNoteByID(note.NoteId).FirstOrDefault();
+            var existing = _noteRepo.GetNoteByID(note.NoteId);
             if (existing == null)
             {
                 return NotFound();
@@ -225,6 +227,11 @@ namespace NoteFeature_App.Controllers.Note
             note.CreatedByUserId = Guid.Parse(currentUserId);
             note.CreatedAt = DateTime.Now;
             note.NoteId = Guid.NewGuid();
+                
+            if (note.ActiveUntil != null && (note.ActiveUntil < note.ActiveFrom))
+            {
+                return Json(new { success = false, errors = new[] { "พบข้อผิดพลาด โปรดระบุวันสิ้นสุดที่ถูกต้อง" }});
+            }
 
             await _noteRepo.AddNote(note, files);
 
@@ -248,7 +255,7 @@ namespace NoteFeature_App.Controllers.Note
                     return Json(new { success = false, errors = errors });
                 }
 
-                var existing = _noteRepo.GetNoteByID(note.NoteId).FirstOrDefault();
+                var existing = _noteRepo.GetNoteByID(note.NoteId);
                 if (existing == null)
                 {
                     return Json(new { success = false, errors = new[] { "Note not found." } });
@@ -264,12 +271,19 @@ namespace NoteFeature_App.Controllers.Note
                     return Json(new { success = false, errors = new[] { "You don't have permission to edit this note." } });
                 }
 
+                if (note.ActiveUntil != null && (note.ActiveUntil < note.ActiveFrom))
+                {
+                    return Json(new { success = false, errors = new[] { "พบข้อผิดพลาด โปรดระบุวันสิ้นสุดที่ถูกต้อง" } });
+                }
+
                 // Update note
                 existing.NoteTitle = note.NoteTitle;
                 existing.NoteContent = note.NoteContent;
                 existing.IsPinned = note.IsPinned;
                 existing.UpdatedAt = DateTime.Now;
                 existing.UpdatedByUserId = Guid.Parse(currentUserId);
+                existing.ActiveFrom = note.ActiveFrom;
+                existing.ActiveUntil = note.ActiveUntil;
                 existing.IsPublic = CaculateIsPublicHelper.CalculateIsPublic(note.ActiveFrom, note.ActiveUntil);
 
                 _noteRepo.UpdateNote(existing);
@@ -301,7 +315,7 @@ namespace NoteFeature_App.Controllers.Note
                 return View();
             }
 
-            var note = _noteRepo.GetNoteByID(noteId).FirstOrDefault();
+            var note = _noteRepo.GetNoteByID(noteId);
             if (note == null)
             {
                 return NotFound();
@@ -365,6 +379,31 @@ namespace NoteFeature_App.Controllers.Note
         protected string InnerException(Exception ex)
         {
             return (ex.InnerException != null) ? InnerException(ex.InnerException) : ex.Message;
+        }
+
+        [Route("/card-deleteimage")]
+        [HttpPost]
+        public JsonResult CardDeleteImage(Guid resourceID)
+        {
+            try
+            {
+                if (resourceID == Guid.Empty) throw new Exception("invalid resource id.");
+                var result = _noteRepo.deleteImage(resourceID);
+
+                return Json(new
+                {
+                    success = true,
+                    data = result,
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = InnerException(ex)
+                });
+            }
         }
 
     }

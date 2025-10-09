@@ -12,11 +12,12 @@ namespace NoteFeature_App.Repositories
     {
         //Action Method List
         List<NoteModel> GetAllNote();
-        List<NoteModel> GetNoteByID(Guid? noteId);
+        NoteModel GetNoteByID(Guid? noteId);
         Task AddNote(NoteModel? note, List<IFormFile>? files = null);
         void UpdateNote(NoteModel? note);
         void DeleteNote(Guid? noteId);
         NotePagination GetListNotePagination(NotePagination pagination, string? currentUserId = null, bool isAdmin = false);
+        Guid deleteImage(Guid id);
 
     }
 
@@ -50,7 +51,7 @@ namespace NoteFeature_App.Repositories
         }
 
         //GET NOTE BY ID
-        public List<NoteModel> GetNoteByID(Guid? noteId)
+        public NoteModel? GetNoteByID(Guid? noteId)
         {
             if (noteId == null)
             {
@@ -60,9 +61,10 @@ namespace NoteFeature_App.Repositories
             return _db.Notes
                 .Include(n => n.CreatedByUser)
                 .Include(n => n.UpdatedByUser)
-                .Include(n => n.NoteFiles)
+                .Include(n => n.NoteFiles.Where(f => f.FlagActive))
                 .Where(n => n.NoteId == noteId && n.FlagActive == true)
-                .ToList();
+                .FirstOrDefault();
+                
         }
 
         //ADD NOTE
@@ -357,5 +359,22 @@ namespace NoteFeature_App.Repositories
 
             return Notes;
         }
+
+        public Guid deleteImage(Guid id)
+        {
+            Guid resp = Guid.Empty;
+            NoteFile? get_notefileId = _db.NoteFiles.FirstOrDefault(f => f.NoteFileId == id);
+            if (get_notefileId == null) throw new Exception("resouce not found.");
+            else
+            {
+                get_notefileId.FlagActive = false;
+
+                _db.SaveChanges();
+
+                resp = get_notefileId.NoteFileId;
+            }
+            return resp;
+        }
+
     }
 }
