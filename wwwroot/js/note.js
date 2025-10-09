@@ -312,7 +312,12 @@ var note = {
             formData.append('NoteTitle', $('#createNoteTitle').val());
             formData.append('NoteContent', $('#createNoteContent').val());
             formData.append('IsPinned', $('#createIsPinned').is(':checked'));
-            formData.append('ActiveFrom', $('#publishStartDate').val());
+
+            let startDate = $('#publishStartDate').val() || new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            //สูตรแปลง UTC เป็น local ถ้าไม่แปลงมันจะเป็น UTC ซึ่งในโปนเจคไม่ใช้
+            //if null set to for date time now local format
+            formData.append('ActiveFrom', startDate);
+
             formData.append('ActiveUntil', $('#publishEndDate').val());
             // Get files from dropzone
             files.forEach((file, index) => {

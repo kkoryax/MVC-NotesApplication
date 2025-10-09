@@ -50,16 +50,13 @@
                     </div>
 
                     <!-- Date setup for deal feature -->
-                    <di class="mb-3 d-flex gap-3">
+                    <di class="mb-3 d-flex row-cols-2 px-3 gap-3" style="margin-left: -15px;">
                         <div class="">
                             <label class="user-select-none" for="publishStartDate">
-                                Publish Start Date <span class="text-danger ">*</span>
+                                Publish Start Date
                             </label>
                             <input id="publishStartDate" type="datetime-local" class="form-control"
-                                    min="@DateTime.Now.ToString("yyyy-MM-dd HH:mm")"
-                                    value="@DateTime.Now.ToString("yyyy-MM-dd HH:mm")"
-                                required
-                            />
+                                    min="@DateTime.Now.ToString("yyyy-MM-dd HH:mm")" />
                         </div>
                         <div class="">
                             <label class="user-select-none" for="publishEndDate">Publish End Date</label>
