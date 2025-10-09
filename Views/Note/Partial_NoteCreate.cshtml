@@ -56,14 +56,16 @@
                                 Publish Start Date <span class="text-danger ">*</span>
                             </label>
                             <input id="publishStartDate" type="datetime-local" class="form-control"
-                                    min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")"
-                                    value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")"
+                                    min="@DateTime.Now.ToString("yyyy-MM-dd HH:mm")"
+                                    value="@DateTime.Now.ToString("yyyy-MM-dd HH:mm")"
                                 required
                             />
                         </div>
                         <div class="">
                             <label class="user-select-none" for="publishEndDate">Publish End Date</label>
-                            <input id="publishEndDate" type="datetime-local" class="form-control" />
+                            <input id="publishEndDate" type="datetime-local" class="form-control"
+                                   min="@DateTime.Now.ToString("yyyy-MM-dd HH:mm")" 
+                            />
                         </div>  
                     </di>
 

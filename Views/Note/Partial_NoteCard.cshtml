@@ -18,6 +18,15 @@
                         </strong>
                     </div>
                 }
+                @if (note.FlagActive && !note.IsPublic && note.ActiveUntil != null)
+                {
+                    <div class="position-absolute px-2 py-1 bg-secondary text-white rounded"
+                         style="top: -10px; right: -10px; z-index: 10;">
+                        <strong class="user-select-none" style="font-size: 0.8rem;">
+                            Unpublish
+                        </strong>
+                    </div>
+                }
                 <div class="card-body d-flex flex-column p-4 flex-nowrap">
                     <h5 class="card-title mb-2 user-select-none text-truncate">
                         @if (note.IsPinned == true)

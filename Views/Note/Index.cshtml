@@ -234,6 +234,10 @@
                         <option value="Timelimit">Time Limit</option>
                         <option value="Nonlimit">Non-Time Limit</option>
                         <option value="Expiredsoon">Expired Soon</option>
+                        @if (User.IsInRole("User") || User.IsInRole("Admin"))
+                        {
+                            <option value="Unpublish">Unpublish</option>
+                        }
                     </select>
                 </div>
                 <div class="modal-footer">

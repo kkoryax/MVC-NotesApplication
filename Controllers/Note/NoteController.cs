@@ -331,11 +331,11 @@ namespace NoteFeature_App.Controllers.Note
                 if (pagination == null) pagination = new NotePagination();
                 pagination.Offset = pagination.Page <= 1 ? 0 : pagination.Offset;
 
-                var result = _noteRepo.GetListNotePagination(pagination);
-
                 var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 var isAdmin = User.IsInRole("Admin");
                 var isUser = User.IsInRole("User");
+                
+                var result = _noteRepo.GetListNotePagination(pagination, currentUserId, isAdmin);
 
                 var notesList = result.Notes.ToList();
 

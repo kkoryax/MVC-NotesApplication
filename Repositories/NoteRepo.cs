@@ -16,7 +16,7 @@ namespace NoteFeature_App.Repositories
         Task AddNote(NoteModel? note, List<IFormFile>? files = null);
         void UpdateNote(NoteModel? note);
         void DeleteNote(Guid? noteId);
-        NotePagination GetListNotePagination(NotePagination pagination);
+        NotePagination GetListNotePagination(NotePagination pagination, string? currentUserId = null, bool isAdmin = false);
 
     }
 
@@ -218,7 +218,7 @@ namespace NoteFeature_App.Repositories
             _db.SaveChanges();
         }
 
-        public NotePagination GetListNotePagination(NotePagination pagination)
+        public NotePagination GetListNotePagination(NotePagination pagination, string? currentUserId = null, bool isAdmin = false)
         {
             NotePagination Notes = new NotePagination();
 
@@ -238,7 +238,12 @@ namespace NoteFeature_App.Repositories
                             .Include(n => n.NoteFiles)
                             .AsQueryable();
 
-            query = query.Where(n => n.FlagActive == true && n.IsPublic == true);
+            query = query.Where(n => n.FlagActive == true);
+            
+            if (!statusFilter.Contains("Unpublish"))
+            {
+                query = query.Where(n => n.IsPublic == true);
+            }
 
             if (!string.IsNullOrEmpty(search))
             {
@@ -290,15 +295,34 @@ namespace NoteFeature_App.Repositories
                 }
                 if (statusFilter.Contains("Expiredsoon"))
                 {
-                    var yearsFromNow = DateTime.Now.AddYears(12);
                     query = query
                             .Where(n => n.ActiveUntil.HasValue && 
                                       n.ActiveUntil != null && 
                                       n.IsPublic == true &&
-                                      n.ActiveUntil.Value <= yearsFromNow &&
                                       n.ActiveUntil.Value >= DateTime.Now);
                 }
+                if (statusFilter.Contains("Unpublish"))
+                {
+                    if (isAdmin)
+                    {
+                        query = query.Where(n => n.IsPublic == false && n.ActiveUntil.HasValue && n.ActiveUntil >= DateTime.Now);
+                    }
+                    else if (!string.IsNullOrEmpty(currentUserId))
+                    {
+                        var userId = Guid.Parse(currentUserId);
+                        query = query.Where(n => n.IsPublic == false && 
+                                                n.ActiveUntil.HasValue && 
+                                                n.ActiveUntil >= DateTime.Now &&
+                                                n.CreatedByUserId == userId);
+                    }
+                    else
+                    {
+                        query = query.Where(n => false);
+                    }
+                }
             }
+
+            //Order queue
             if (statusFilter.Contains("Expiredsoon") && sort == "CreatedAt desc")
             {
                 query = query

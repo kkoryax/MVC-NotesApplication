@@ -37,14 +37,21 @@
                     <div id="editMode">
                         <div class="mb-3">
                             <small class="text-muted  user-select-none">
-                                @if (Model.ActiveFrom != Model.CreatedAt)
+                                @if (Model.ActiveFrom != Model.CreatedAt && Model.IsPublic)
                                 {
                                     <i class="bi bi-calendar3 me-1"></i>
                                     <span class="me-4">created date: @Model.ActiveFrom.ToString("yyyy-MM-dd HH:mm")</span>
-                                } else
-                                {
+
+                                } else if (Model.ActiveFrom != Model.CreatedAt && !Model.IsPublic)  {
+
+                                    <i class="bi bi-stopwatch me-1"></i>
+                                    <span class="me-4">will be active: @Model.ActiveFrom.ToString("yyyy-MM-dd HH:mm")</span>
+
+                                } else {
+
                                     <i class="bi bi-calendar3 me-1"></i>
                                     <span class="me-4">created date: @Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</span>
+
                                 }
                                 @if (Model.UpdatedAt != null)
                                 {
