@@ -18,7 +18,8 @@
                         </strong>
                     </div>
                 }
-                @if (note.FlagActive && !note.IsPublic && note.ActiveUntil != null)
+                @if (note.FlagActive && !note.IsPublic &&
+                        (!note.ActiveUntil.HasValue || note.ActiveUntil >= DateTime.Now))
                 {
                     <div class="position-absolute px-2 py-1 bg-secondary text-white rounded"
                          style="top: -10px; right: -10px; z-index: 10;">

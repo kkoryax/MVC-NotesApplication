@@ -305,15 +305,15 @@ namespace NoteFeature_App.Repositories
                 {
                     if (isAdmin)
                     {
-                        query = query.Where(n => n.IsPublic == false && n.ActiveUntil.HasValue && n.ActiveUntil >= DateTime.Now);
+                        query = query.Where(n => n.IsPublic == false &&
+                                            (!n.ActiveUntil.HasValue || n.ActiveUntil >= DateTime.Now));
                     }
                     else if (!string.IsNullOrEmpty(currentUserId))
                     {
                         var userId = Guid.Parse(currentUserId);
-                        query = query.Where(n => n.IsPublic == false && 
-                                                n.ActiveUntil.HasValue && 
-                                                n.ActiveUntil >= DateTime.Now &&
-                                                n.CreatedByUserId == userId);
+                        query = query.Where(n => n.IsPublic == false &&
+                                                 (!n.ActiveUntil.HasValue || n.ActiveUntil >= DateTime.Now) &&
+                                                    n.CreatedByUserId == userId);
                     }
                     else
                     {
