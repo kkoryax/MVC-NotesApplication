@@ -288,10 +288,29 @@ namespace NoteFeature_App.Repositories
                 {
                     query = query.Where(n => !n.ActiveUntil.HasValue);
                 }
+                if (statusFilter.Contains("Expiredsoon"))
+                {
+                    var yearsFromNow = DateTime.Now.AddYears(12);
+                    query = query
+                            .Where(n => n.ActiveUntil.HasValue && 
+                                      n.ActiveUntil != null && 
+                                      n.IsPublic == true &&
+                                      n.ActiveUntil.Value <= yearsFromNow &&
+                                      n.ActiveUntil.Value >= DateTime.Now);
+                }
             }
-
-            // Order query
-            if (sort == "CreatedAt desc")
+            if (statusFilter.Contains("Expiredsoon") && sort == "CreatedAt desc")
+            {
+                query = query
+                        .OrderByDescending(n => n.IsPinned == true)
+                        .ThenBy(n => n.ActiveUntil.Value);
+            } else if (statusFilter.Contains("Expiredsoon") && sort == "CreatedAt asc")
+            {
+                query = query
+                        .OrderByDescending(n => n.IsPinned == true)
+                        .ThenByDescending(n => n.ActiveUntil.Value);
+            }
+            else if (sort == "CreatedAt desc")
             {
                 query = query
                         .OrderByDescending(n => n.IsPinned == true)
