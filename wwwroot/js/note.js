@@ -125,9 +125,32 @@ var note = {
                             //Bind Delete button
                             $(document).off("click", "button[data-action='deleteImageCard']")
                                 .on("click", "button[data-action='deleteImageCard']", function () {
-                                    var resourceID = $(this).data("img");
-                                    note.deleteImage(resourceID);
+
+                                    const swalWithBootstrapButtons = Swal.mixin({
+                                        customClass: {
+                                            confirmButton: "btn btn-danger ms-2",
+                                            cancelButton: "btn btn-secondary me-2"
+                                        },
+                                        buttonsStyling: false
                                     });
+
+                                    swalWithBootstrapButtons.fire({
+                                        title: "Notification",
+                                        text: `คุณแน่ใจหรือไม่ที่จะลบรูปภาพ?`,
+                                        icon: "warning",
+                                        showCancelButton: true,
+                                        confirmButtonText: "ตกลง",
+                                        cancelButtonText: "ยกเลิก",
+                                        reverseButtons: true
+                                        })
+                                        .then((result) => {
+                                        if (result.isConfirmed) {
+                                            var resourceID = $(this).data("img");
+                                            note.deleteImage(resourceID);
+                                        }
+                                    });
+
+                                });
                             //Bind Save Button
                             $('#saveEditBtn').off('click').on('click', function () {
                                 note.saveNote(noteId);

@@ -60,11 +60,11 @@
                                     <i class="bi bi-person"></i> @note.CreatedByUser?.Email
                                 </small>
                                 <small class="text-muted">
-                                    @if (note.NoteFiles != null && note.NoteFiles.Any())
+                                    @if (note.NoteFiles != null && note.NoteFiles.Any(f => f.FlagActive))
                                     {
                                         <i class="bi bi-paperclip"></i>
                             
-                                        <small class="user-select-none">@note.NoteFiles.Count file attachment</small>
+                                        <small class="user-select-none">@note.NoteFiles.Count(f => f.FlagActive) file attachment</small>
                                     }
                                 </small>
                             </div>
