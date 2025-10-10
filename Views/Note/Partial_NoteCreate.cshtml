@@ -11,7 +11,7 @@
                 <h5 class="modal-title user-select-none">
                     Create Note
                 </h5>
-                <button type="button" class="btn-close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <!-- Create Mode Only -->
@@ -43,16 +43,33 @@
                         <form class="dropzone" id="previewDropzone">
                             <div class="dz-message">
                                 <i class="fas fa-upload"></i>
-                                <div>Drop files here or click above input</div>
-                                <small class="">(Selected files are not actually uploaded.)</small>
+                                <div class="user-select-none">Drop files here or click above input</div>
+                                <small class="user-select-none">(Selected files are not actually uploaded.)</small>
                             </div>
                         </form>
+                    </div>
+
+                    <!-- Date setup for deal feature -->
+                    <div class="mb-3 d-flex row-cols-2 px-3 gap-3" style="margin-left: -15px;">
+                        <div class="">
+                            <label class="user-select-none" for="publishStartDate">
+                                Publish Start Date
+                            </label>
+                            <input id="publishStartDate" type="datetime-local" class="form-control"
+                                    min="@DateTime.Now.ToString("yyyy-MM-dd HH:mm")" />
+                        </div>
+                        <div class="">
+                            <label class="user-select-none" for="publishEndDate">Publish End Date</label>
+                            <input id="publishEndDate" type="datetime-local" class="form-control"
+                                   min="@DateTime.Now.ToString("yyyy-MM-dd HH:mm")" 
+                            />
+                        </div>  
                     </div>
 
                     <div class="mb-3 d-flex flex-row justify-content-between">
                         <div class="form-check" id="createIsPinnedBox">
                             <input type="checkbox" id="createIsPinned" name="IsPinned" value="true" class="form-check-input user-select-none" />
-                            <label for="createIsPinned" class="form-check-label">
+                            <label for="createIsPinned" class="form-check-label user-select-none">
                                 Pin this note
                             </label>
                         </div>

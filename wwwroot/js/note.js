@@ -112,20 +112,46 @@ var note = {
                         });
                     }
 
-                    if (res.canEdit) {
-                        $('#editForm :input').prop('disabled', false);
-                        $('#editIsPinnedBox').show();
+                    if (!res.isPublic) {
+                        if (res.canEdit) {
+                            $('#editForm :input').prop('disabled', false);
+                            $('#editIsPinnedBox').show();
+                            $('#previewFile').hide();
+                            $('#editFileAndPublish').show();
+                            $('#previewFileModel').show();
 
-                        $('#saveEditBtn').show();
-                        $('#saveEditBtn').off('click').on('click', function () {
-                            note.saveNote(noteId);
-                        });
+                            $('#saveEditBtn').show();
 
+                            //Bind Delete button
+                            $(document).off("click", "button[data-action='deleteImageCard']")
+                                .on("click", "button[data-action='deleteImageCard']", function () {
+                                    var resourceID = $(this).data("img");
+                                    note.deleteImage(resourceID);
+                                    });
+                            //Bind Save Button
+                            $('#saveEditBtn').off('click').on('click', function () {
+                                note.saveNote(noteId);
+                            });
+
+                            note.initDropzone();
+
+                        } else {
+                            $('#editForm :input').prop('disabled', true);
+                            $('#editIsPinnedBox').hide();
+                            $('#previewFile').show();
+                            $('#previewFileModel').hide();
+                            $('#editFileAndPublish').hide();
+                            $('#saveEditBtn').hide();
+                        }
                     } else {
                         $('#editForm :input').prop('disabled', true);
                         $('#editIsPinnedBox').hide();
+                        $('#previewFile').show();
+                        $('#previewFileModel').hide();
+                        $('#editFileAndPublish').hide();
                         $('#saveEditBtn').hide();
                     }
+                    
                 } else {
                     app.notify("error", res.message);
                 }
@@ -178,9 +204,10 @@ var note = {
             NoteId: noteId,
             NoteTitle: $('#editNoteTitle').val(),
             NoteContent: $('#editNoteContent').val(),
-            IsPinned: $('#editIsPinned').is(':checked')
-        };
-
+            IsPinned: $('#editIsPinned').is(':checked'),
+            ActiveFrom: $('#publishStartDate').val(),
+            ActiveUntil: $('#publishEndDate').val()
+        };     
         $.ajax({
             type: "POST",
             url: "/update-note",
@@ -312,6 +339,13 @@ var note = {
             formData.append('NoteTitle', $('#createNoteTitle').val());
             formData.append('NoteContent', $('#createNoteContent').val());
             formData.append('IsPinned', $('#createIsPinned').is(':checked'));
+
+            let startDate = $('#publishStartDate').val() || new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            //สูตรแปลง UTC เป็น local ถ้าไม่แปลงมันจะเป็น UTC ซึ่งในโปนเจคไม่ใช้
+            //if null set to for date time now local format
+            formData.append('ActiveFrom', startDate);
+
+            formData.append('ActiveUntil', $('#publishEndDate').val());
             // Get files from dropzone
             files.forEach((file, index) => {
                 formData.append('files', file, file.name);
@@ -440,6 +474,27 @@ var note = {
                     }
                     inputEl.files = dt.files; // อัปเดต input ให้ตรงกับ Dropzone
                 });
+            }
+        });
+    },
+    //Delete Image from dropzone PTAR
+    initDeleteImage: function () {
+        $('')
+    },
+    deleteImage: function (resourceID) {
+        $.ajax({
+            url: "/card-deleteimage",
+            type: 'POST',
+            data: { resourceID: resourceID },
+            success: function (res) {
+                if (res.success) {
+                    // ลบกล่อง preview-item ออก
+                    $('.preview-item[data-img="' + resourceID + '"]').remove();
+                } else {
+                    app.notify("error", res.message);
+                }
+            },
+            error: function () {
             }
         });
     }

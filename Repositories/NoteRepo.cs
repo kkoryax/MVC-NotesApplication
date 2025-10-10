@@ -12,11 +12,12 @@ namespace NoteFeature_App.Repositories
     {
         //Action Method List
         List<NoteModel> GetAllNote();
-        List<NoteModel> GetNoteByID(Guid? noteId);
+        NoteModel GetNoteByID(Guid? noteId);
         Task AddNote(NoteModel? note, List<IFormFile>? files = null);
         void UpdateNote(NoteModel? note);
         void DeleteNote(Guid? noteId);
-        NotePagination GetListNotePagination(NotePagination pagination);
+        NotePagination GetListNotePagination(NotePagination pagination, string? currentUserId = null, bool isAdmin = false);
+        Guid deleteImage(Guid id);
 
     }
 
@@ -50,7 +51,7 @@ namespace NoteFeature_App.Repositories
         }
 
         //GET NOTE BY ID
-        public List<NoteModel> GetNoteByID(Guid? noteId)
+        public NoteModel? GetNoteByID(Guid? noteId)
         {
             if (noteId == null)
             {
@@ -60,9 +61,10 @@ namespace NoteFeature_App.Repositories
             return _db.Notes
                 .Include(n => n.CreatedByUser)
                 .Include(n => n.UpdatedByUser)
-                .Include(n => n.NoteFiles)
+                .Include(n => n.NoteFiles.Where(f => f.FlagActive))
                 .Where(n => n.NoteId == noteId && n.FlagActive == true)
-                .ToList();
+                .FirstOrDefault();
+                
         }
 
         //ADD NOTE
@@ -86,7 +88,10 @@ namespace NoteFeature_App.Repositories
                 //Add default values
                 note.FlagActive = true;
 
-                /* Add Note File data */
+                //check is public now or not via helper
+                note.IsPublic = CaculateIsPublicHelper.CalculateIsPublic(note.ActiveFrom, note.ActiveUntil);
+
+                    /* Add Note File data */
                 note.NoteFiles = new List<NoteFile>();
 
                 var request = _httpContextAccessor.HttpContext?.Request;
@@ -130,6 +135,7 @@ namespace NoteFeature_App.Repositories
                                 NoteId = note.NoteId,
                                 NoteFileName = rawFileName + fileExtension,
                                 NoteFilePath = urlPath,
+                                NoteFileSize = file.Length,
                                 NoteFileType = file.ContentType,
                                 UploadedDate = DateTime.Now
                             });
@@ -165,7 +171,10 @@ namespace NoteFeature_App.Repositories
             note_find_by_id.NoteTitle = note.NoteTitle;
             note_find_by_id.NoteContent = note.NoteContent;
             note_find_by_id.UpdatedAt = DateTime.Now;
-            note_find_by_id.UpdatedByUserId = note.UpdatedByUserId;
+            note_find_by_id.UpdatedByUserId = note.UpdatedByUserId;   
+            note_find_by_id.ActiveFrom = note.ActiveFrom;
+            note_find_by_id.ActiveUntil = note.ActiveUntil;
+            note_find_by_id.IsPublic = CaculateIsPublicHelper.CalculateIsPublic(note.ActiveFrom, note.ActiveUntil);
 
             if (note.UpdatedByUserId.HasValue)
             {
@@ -211,7 +220,7 @@ namespace NoteFeature_App.Repositories
             _db.SaveChanges();
         }
 
-        public NotePagination GetListNotePagination(NotePagination pagination)
+        public NotePagination GetListNotePagination(NotePagination pagination, string? currentUserId = null, bool isAdmin = false)
         {
             NotePagination Notes = new NotePagination();
 
@@ -232,6 +241,11 @@ namespace NoteFeature_App.Repositories
                             .AsQueryable();
 
             query = query.Where(n => n.FlagActive == true);
+            
+            if (!statusFilter.Contains("Unpublish"))
+            {
+                query = query.Where(n => n.IsPublic == true);
+            }
 
             if (!string.IsNullOrEmpty(search))
             {
@@ -273,10 +287,56 @@ namespace NoteFeature_App.Repositories
                 {
                     query = query.Where(n => n.IsPinned == false);
                 }
+                if (statusFilter.Contains("Timelimit"))
+                {
+                    query = query.Where(n => n.ActiveUntil != null && n.IsPublic == true);
+                }
+                if (statusFilter.Contains("Nonlimit"))
+                {
+                    query = query.Where(n => !n.ActiveUntil.HasValue);
+                }
+                if (statusFilter.Contains("Expiredsoon"))
+                {
+                    query = query
+                            .Where(n => n.ActiveUntil.HasValue && 
+                                      n.ActiveUntil != null && 
+                                      n.IsPublic == true &&
+                                      n.ActiveUntil.Value >= DateTime.Now);
+                }
+                if (statusFilter.Contains("Unpublish"))
+                {
+                    if (isAdmin)
+                    {
+                        query = query.Where(n => n.IsPublic == false &&
+                                            (!n.ActiveUntil.HasValue || n.ActiveUntil >= DateTime.Now));
+                    }
+                    else if (!string.IsNullOrEmpty(currentUserId))
+                    {
+                        var userId = Guid.Parse(currentUserId);
+                        query = query.Where(n => n.IsPublic == false &&
+                                                 (!n.ActiveUntil.HasValue || n.ActiveUntil >= DateTime.Now) &&
+                                                    n.CreatedByUserId == userId);
+                    }
+                    else
+                    {
+                        query = query.Where(n => false);
+                    }
+                }
             }
 
-            // Order query
-            if (sort == "CreatedAt desc")
+            //Order queue
+            if (statusFilter.Contains("Expiredsoon") && sort == "CreatedAt desc")
+            {
+                query = query
+                        .OrderByDescending(n => n.IsPinned == true)
+                        .ThenBy(n => n.ActiveUntil.Value);
+            } else if (statusFilter.Contains("Expiredsoon") && sort == "CreatedAt asc")
+            {
+                query = query
+                        .OrderByDescending(n => n.IsPinned == true)
+                        .ThenByDescending(n => n.ActiveUntil.Value);
+            }
+            else if (sort == "CreatedAt desc")
             {
                 query = query
                         .OrderByDescending(n => n.IsPinned == true)
@@ -299,5 +359,22 @@ namespace NoteFeature_App.Repositories
 
             return Notes;
         }
+
+        public Guid deleteImage(Guid id)
+        {
+            Guid resp = Guid.Empty;
+            NoteFile? get_notefileId = _db.NoteFiles.FirstOrDefault(f => f.NoteFileId == id);
+            if (get_notefileId == null) throw new Exception("resouce not found.");
+            else
+            {
+                get_notefileId.FlagActive = false;
+
+                _db.SaveChanges();
+
+                resp = get_notefileId.NoteFileId;
+            }
+            return resp;
+        }
+
     }
 }

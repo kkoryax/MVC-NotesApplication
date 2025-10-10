@@ -19,7 +19,12 @@ namespace NoteFeature_App.Models.Note
         [Required]
         public string? NoteFileType { get; set; }
 
+        [Required]
+        public long NoteFileSize { get; set; }
+
         public DateTime UploadedDate { get; set; }
+
+        public bool FlagActive { get; set; } = true;
 
         //Navigation property
         public NoteModel? Note { get; set; }

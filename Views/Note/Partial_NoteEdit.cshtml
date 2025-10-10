@@ -3,6 +3,16 @@
 @*
     For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 *@
+<style>
+    .cards {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+        .cards:hover {
+            box-shadow: 5px 6px 6px 2px #e9ecef;
+            transform: scale(1.1);
+        }
+</style>
 
     <!-- Note Edit Modal -->
     <div class="modal fade" id="noteDetailModal" tabindex="-1">
@@ -26,20 +36,41 @@
                     <!-- Edit Mode Only -->
                     <div id="editMode">
                         <div class="mb-3">
-                            <small class="text-muted">
-                                <i class="bi bi-calendar3 me-1"></i>
-                                <span class="me-4">@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</span>
+                            <small class="text-muted  user-select-none">
+                                @if (Model.ActiveFrom != Model.CreatedAt && Model.IsPublic)
+                                {
+                                    <i class="bi bi-calendar3 me-1"></i>
+                                    <span class="me-4">created date: @Model.ActiveFrom.ToString("yyyy-MM-dd HH:mm")</span>
+
+                                } else if (Model.ActiveFrom != Model.CreatedAt && !Model.IsPublic)  {
+
+                                    <i class="bi bi-stopwatch me-1"></i>
+                                    <span class="me-4">will be active: @Model.ActiveFrom.ToString("yyyy-MM-dd HH:mm")</span>
+
+                                } else {
+
+                                    <i class="bi bi-calendar3 me-1"></i>
+                                    <span class="me-4">created date: @Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</span>
+
+                                }
                                 @if (Model.UpdatedAt != null)
                                 {
-                                    <span>updated: @Model.UpdatedAt?.ToString("yyyy-MM-dd HH:mm")</span>
+                                    <i class="bi bi-pen me-1"></i>
+                                    <span class="me-4">latest updated: @Model.UpdatedAt?.ToString("yyyy-MM-dd HH:mm")</span>
                                 }
-                                <br>
-
+                                @if (Model.ActiveUntil.HasValue && Model.ActiveUntil != null)
+                                {
+                                    <br />
+                                    <i class="bi bi-stopwatch me-1"></i>
+                                    <span>active until: @Model.ActiveUntil?.ToString("yyyy-MM-dd HH:mm")</span>
+                                }
+                                <br />
                                 <i class="bi bi-person me-1"></i>
-                                <span>@Model.CreatedByUser?.Email</span>
+                                <span>created by: @Model.CreatedByUser?.Email</span>
                             </small>
                         </div>
-                        <form id="editForm">
+
+                        <div id="editForm">
                             <input type="hidden" id="editNoteId" name="NoteId" />
 
                             <div class="mb-3">
@@ -49,85 +80,96 @@
                                 <input class="form-control" id="editNoteTitle" name="NoteTitle" type="text" value="@Model.NoteTitle" required />
                             </div>
 
-                        <!-- File Zone -->
-                        <div class="mb-3">
-                            @if (Model.NoteFiles != null && Model.NoteFiles.Any())
-                             {
-                                //check file ext
-                                var imageFiles = Model.NoteFiles.Where(
-                                f => f.NoteFileType?.ToLower() == "image/jpeg" || f.NoteFileType?.ToLower() == "image/png"
-                                ).ToList();
+                            <!-- File Zone -->
+                            <div class="mb-3" id="previewFile">
+                                @if (Model.NoteFiles != null && Model.NoteFiles.Any())
+                                 {
+                                    //check file ext
+                                    var imageFiles = Model.NoteFiles.Where(
+                                    f => f.NoteFileType?.ToLower() == "image/jpeg" || f.NoteFileType?.ToLower() == "image/png"
+                                    ).ToList();
 
-                                var pdfFiles = Model.NoteFiles.Where(
-                                f => f.NoteFileType?.ToLower() == "application/pdf"
-                                ).ToList();
+                                    var pdfFiles = Model.NoteFiles.Where(
+                                    f => f.NoteFileType?.ToLower() == "application/pdf"
+                                    ).ToList();
 
-                                //image
-                                @if (imageFiles.Any())
-                                {
-                                    <label class="form-label user-select-none">
-                                        Image
-                                        <span class="text-danger">*</span>
-                                    </label>
-
-                                    var groupImages = "group-image";
-                                    int index = 1;
-
-                                    var previewImage = imageFiles.FirstOrDefault();
-                                    if (previewImage != null)
+                                    //image
+                                    @if (imageFiles.Any())
                                     {
-                                        <div class="d-flex justify-content-center">
-                                            <div class="position-relative">
-                                                <a href="@previewImage.NoteFilePath" data-fancybox="@groupImages" data-caption="ภาพที่ @index">
-                                                    <img src="@previewImage.NoteFilePath" style="height: 200px; width: auto; border-radius: 8px; cursor: pointer;" alt="ภาพที่ @index" />
-                                                </a>
-                                                @if (imageFiles.Count() > 1)
+                                        <label class="form-label user-select-none">
+                                            Image
+                                            <span class="text-danger">*</span>
+                                        </label>
+
+                                        var groupImages = "group-image";
+                                        int index = 1;
+
+                                        var previewImage = imageFiles.FirstOrDefault();
+                                        if (previewImage != null)
+                                        {
+                                            <div class="d-flex justify-content-center">
+                                                <div class="position-relative">
+                                                    <a href="@previewImage.NoteFilePath" data-fancybox="@groupImages" data-caption="ภาพที่ @index">
+                                                        <img src="@previewImage.NoteFilePath" style="height: 200px; width: auto; border-radius: 8px; cursor: pointer;" alt="ภาพที่ @index" />
+                                                    </a>
+                                                    @if (imageFiles.Count() > 1)
+                                                    {
+                                                        <div class="position-absolute top-0 end-0 bg-dark text-white px-2 py-1 rounded" style="font-size: 12px; margin: 8px;">
+                                                            <span class="user-select-none">
+                                                                +@(imageFiles.Count() - 1)
+                                                            </span>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                            index++;
+
+                                            <div style="display: none;">
+                                                @foreach (var file in imageFiles.Skip(1))
                                                 {
-                                                    <div class="position-absolute top-0 end-0 bg-dark text-white px-2 py-1 rounded" style="font-size: 12px; margin: 8px;">
-                                                        <span class="user-select-none">
-                                                            +@(imageFiles.Count() - 1)
-                                                        </span>
-                                                    </div>
+                                                    <a data-fancybox="@groupImages" data-src="@file.NoteFilePath" data-caption="ภาพที่ @index"></a>
+                                                    index++;
                                                 }
                                             </div>
-                                        </div>
-                                        index++;
-
-                                        <div style="display: none;">
-                                            @foreach (var file in imageFiles.Skip(1))
-                                            {
-                                                <a data-fancybox="@groupImages" data-src="@file.NoteFilePath" data-caption="ภาพที่ @index"></a>
-                                                index++;
-                                            }
-                                        </div>
+                                        }
                                     }
-                                }
 
-                                @if (pdfFiles.Any())
-                                {
-                                    <label class="form-label user-select-none">
-                                        PDF
-                                        <span class="text-danger">*</span>
-                                    </label>
+                                    @if (pdfFiles.Any())
+                                    {
+                                        <label class="form-label user-select-none">
+                                            File Attachment (.pdf)
+                                            <span class="text-danger">*</span>
+                                        </label>
 
-                                    var groupPdf = "group-pdf";
-                                    int index = 1;
+                                        var groupPdf = "group-pdf";
+                                        int index = 1;
 
-                                    <div class="d-flex justify-content-start">
-                                        <div class="position-relative">
+                                        <div class="d-flex flex-wrap justify-content-start gap-3">
                                             @foreach (var file in pdfFiles)
                                             {
-                                                <a href="@file.NoteFilePath" data-fancybox="@groupPdf" data-caption="ไฟล์ที่ @index">
-                                                    @file.NoteFileName
+                                                <a href="@file.NoteFilePath"
+                                                   data-fancybox="@groupPdf"
+                                                   data-caption="ไฟล์ที่ @index"
+                                                   class="text-decoration-none">
+
+                                                    <div class="border border-1 border-secondary p-3 rounded cards"
+                                                         style="height: 80px; width: 160px;">
+                                                        <div class="text-truncate text-primary">
+                                                            @file.NoteFileName
+                                                        </div>
+                                                        <small class="text-muted">
+                                                            @FileSizeHelper.FormatFileSize(file.NoteFileSize)
+                                                        </small>
+                                                    </div>
                                                 </a>
-                                                <br />
                                                 index++;
                                             }
                                         </div>
-                                    </div>
+
+
+                                    }
                                 }
-                            }
-                        </div>
+                            </div>
 
                             <div class="mb-3">
                                 <label for="editNoteContent" class="form-label user-select-none">
@@ -136,24 +178,83 @@
                                 <textarea id="editNoteContent" name="NoteContent" class="form-control" style="height: fit-content" required>@Model.NoteContent</textarea>
                             </div>
 
-                        <div class="mb-3">
-                            <div class="form-check" id="editIsPinnedBox">
-                                <input type="checkbox"
-                                       id="editIsPinned"
-                                       name="IsPinned"
-                                       value="true"
-                                       class="form-check-input"
-                                       @(Model.IsPinned == true ? "checked" : "") />
-                                <label for="editIsPinned" class="form-check-label user-select-none">
-                                    Pin this note
-                                </label>
+                            @if (Model.NoteFiles != null && Model.NoteFiles.Count() > 0 && Model.FlagActive)
+                            {
+                                <div class="row" id="previewFileModel">
+                                    <div class="col-12 col-md-12 mb-3">
+                                        <label class="form-label fw-bold">Preview Image</label>
+                                        <div class="row">
+                                            @foreach (var file in Model.NoteFiles)
+                                            {
+                                            <div class="col-6 col-md-3 mb-3 preview-item" data-img="@file.NoteFileId">
+                                                    <div class="position-relative border rounded p-1">
+                                                        <a href="@file.NoteFilePath" data-fancybox="gallery" data-caption="Preview">
+                                                            <img src="@file.NoteFilePath" class="img-fluid rounded" style="max-height:150px; object-fit:cover;" />
+                                                            </a>
+                                                        <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 btn-remove-img" data-img="@file.NoteFileId" data-action="deleteImageCard">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <div id="editFileAndPublish">
+                                <!-- Dropzone library for upload -->
+                                <label class="form-label required user-select-none">Upload Image</label>
+                                <div class="mb-3">
+                                    <input class="form-control mb-3"
+                                           id="cameraInput"
+                                           type="file"
+                                           style="cursor:pointer;"
+                                           multiple />
+                                    <form class="dropzone" id="previewDropzone">
+                                        <div class="dz-message">
+                                            <i class="fas fa-upload"></i>
+                                            <div class="user-select-none">Drop files here or click above input</div>
+                                            <small class="user-select-none">(Selected files are not actually uploaded.)</small>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <!-- Date setup for deal feature -->
+                                <div class="mb-3 d-flex row-cols-2 px-3 gap-3" style="margin-left: -15px;">
+                                    <div class="">
+                                        <label class="user-select-none" for="publishStartDate">
+                                            Publish Start Date
+                                        </label>
+                                        <input id="publishStartDate" type="datetime-local" class="form-control"
+                                               value="@Model.ActiveFrom.ToString("yyyy-MM-dd HH:mm")" />
+                                    </div>
+                                    <div class="">
+                                        <label class="user-select-none" for="publishEndDate">Publish End Date</label>
+                                        <input id="publishEndDate" type="datetime-local" class="form-control"
+                                               value="@Model.ActiveUntil?.ToString("yyyy-MM-dd HH:mm")" />
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        
+                            <div class="mb-3">
+                                <div class="form-check" id="editIsPinnedBox">
+                                    <input type="checkbox"
+                                           id="editIsPinned"
+                                           name="IsPinned"
+                                           value="true"
+                                           class="form-check-input"
+                                           @(Model.IsPinned == true ? "checked" : "") />
+                                    <label for="editIsPinned" class="form-check-label user-select-none">
+                                        Pin this note
+                                    </label>
+                                </div>
+                            </div>
 
                             <div id="editErrors" class="mb-3 text-danger" style="display: none;"></div>
-                        </form>
+                        </div>
                     </div>
-                </div>
+                </div>   
 
                 <div class="modal-footer">
                     <!-- Edit Mode Buttons -->
