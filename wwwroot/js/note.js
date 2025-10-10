@@ -212,16 +212,6 @@ var note = {
             }
         });
     },
-    resetModal: function () {
-        $('#editErrors').hide().empty();
-        $('#editNoteId').val('');
-        $('#editNoteTitle').val('');
-        $('#editNoteContent').val('');
-        $('#editIsPinned').prop('checked', false);
-        // Ensure inputs are enabled and Save visible by default
-        $('#editForm :input').prop('disabled', false);
-        $('#saveEditBtn').show();
-    },
     saveNote: function (noteId) {
         var formData = {
             NoteId: noteId,
@@ -334,6 +324,8 @@ var note = {
         $('#createErrors').hide().empty();
         $('#createNoteTitle').val('');
         $('#createNoteContent').val('');
+        $('#publishStartDate').val('');
+        $('#publishEndDate').val('');
         $('#createIsPinned').prop('checked', false);
 
         // Clear file input
@@ -362,13 +354,13 @@ var note = {
             formData.append('NoteTitle', $('#createNoteTitle').val());
             formData.append('NoteContent', $('#createNoteContent').val());
             formData.append('IsPinned', $('#createIsPinned').is(':checked'));
-
-            let startDate = $('#publishStartDate').val() || new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            
+            var startDate = $('#createPublishStartDate').val() || new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
             //สูตรแปลง UTC เป็น local ถ้าไม่แปลงมันจะเป็น UTC ซึ่งในโปนเจคไม่ใช้
             //if null set to for date time now local format
             formData.append('ActiveFrom', startDate);
 
-            formData.append('ActiveUntil', $('#publishEndDate').val());
+            formData.append('ActiveUntil', $('#createPublishEndDate').val());
             // Get files from dropzone
             files.forEach((file, index) => {
                 formData.append('files', file, file.name);
